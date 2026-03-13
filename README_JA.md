@@ -50,6 +50,11 @@ HS2VoiceReplace は、Honey Select 2 の音声差し替えを行うための C# 
     - `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_assetstools.ps1`
   - コマンドライン ビルドでは次も利用できます:
     - `-p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll`
+- 保守対象の Python スクリプトと Python テスト向けの repo-local Python
+  - 既定パス:
+    - `.\_tools\python310\python.exe`
+  - 任意の補助スクリプト:
+    - `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1`
 
 ### Runtime plugin
 
@@ -90,6 +95,12 @@ C# と Python のテストをまとめて実行する場合:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\run_tests.ps1
+```
+
+マシン全体の Python に依存せず、repo 内専用の Python を用意したい場合:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1
 ```
 
 ## 開発の入口

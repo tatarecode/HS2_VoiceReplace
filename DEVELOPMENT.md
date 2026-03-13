@@ -6,8 +6,9 @@ This document is intended for a new developer starting from this export only.
 
 1. Read `README.md`
 2. Read `tools/HS2VoiceReplaceGui/README.md`
-3. Run the automated tests
-4. Verify local build prerequisites for the GUI and runtime plugin
+3. If needed, provision repo-local Python with `tools/setup_local_python.ps1`
+4. Run the automated tests
+5. Verify local build prerequisites for the GUI and runtime plugin
 
 ## Project Boundaries
 
@@ -45,6 +46,8 @@ This document is intended for a new developer starting from this export only.
 - This repository does not vendor `AssetsTools.NET.dll`
 - Runtime plugin build depends on game-side Unity and BepInEx assemblies
 - Runtime execution may download external tools during dependency setup
+- Python tests can use a repo-local interpreter at `.\_tools\python310\python.exe`
+- `tools/setup_local_python.ps1` provisions that repo-local Python from the official embeddable Python distribution
 
 ## Maintenance Guidance
 

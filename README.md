@@ -51,6 +51,11 @@ Japanese documentation is available in `README_JA.md`.
     - `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_assetstools.ps1`
   - Command-line builds can also use:
     - `-p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll`
+- Optional repo-local Python for maintained helper scripts and Python tests
+  - Default path:
+    - `.\_tools\python310\python.exe`
+  - Optional helper script:
+    - `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1`
 
 ### Runtime plugin
 
@@ -91,6 +96,12 @@ Or:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\run_tests.ps1
+```
+
+If you want a repository-local Python instead of relying on a machine-wide install:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1
 ```
 
 ## Main Development Entry Points

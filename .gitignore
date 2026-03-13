@@ -4,5 +4,8 @@
 **/.test_artifacts/
 .dotnet_cli_home/
 _tools/uabea/v8/AssetsTools.NET.dll
+_tools/python310/
+**/__pycache__/
+*.pyc
 *.user
 *.suo

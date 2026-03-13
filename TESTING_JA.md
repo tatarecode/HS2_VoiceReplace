@@ -23,6 +23,12 @@
 .\tools\run_tests.cmd
 ```
 
+マシン全体の Python に依存せず、repo 内専用の Python を使ってテストしたい場合:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1
+```
+
 ## 片側だけ実行
 
 ```powershell
@@ -75,6 +81,8 @@ dotnet build .\runtime\HS2VoiceReplace.Runtime\HS2VoiceReplace.Runtime.csproj -c
 ## 補足
 
 - Python テストは `._tools\python310\python.exe` があればそれを優先します。
+- `tools/setup_local_python.ps1` は、公式の embeddable Python 3.10.11 と現在の Python テスト依存を `.\_tools\python310` にセットアップします。
+- repo-local Python を最初から作り直したい場合は `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1 -Force` を使ってください。
 - PowerShell の実行制限がある場合は `.\tools\run_tests.cmd` を使ってください。
 - C# テストは `xUnit` と `dotnet test` を使用します。
 - ユーザー向け文言や localization metadata を変更した場合は、関連する C# テストも更新してください。

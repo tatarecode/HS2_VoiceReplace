@@ -6,8 +6,9 @@
 
 1. `README.md` または `README_JA.md`
 2. `tools/HS2VoiceReplaceGui/README.md` または `tools/HS2VoiceReplaceGui/README_JA.md`
-3. 自動テストの実行結果
-4. GUI と runtime plugin のビルド前提
+3. 必要なら `tools/setup_local_python.ps1` による repo-local Python の準備
+4. 自動テストの実行結果
+5. GUI と runtime plugin のビルド前提
 
 ## プロジェクトの境界
 
@@ -45,6 +46,8 @@
 - このリポジトリには `AssetsTools.NET.dll` を同梱しません。
 - runtime plugin のビルドには Unity / BepInEx の game-side DLL が必要です。
 - 実行時には依存セットアップで外部ツールを取得する場合があります。
+- Python テストは `.\_tools\python310\python.exe` の repo-local Python を利用できます。
+- `tools/setup_local_python.ps1` は、公式の embeddable Python からその repo-local Python をセットアップします。
 
 ## 保守上の注意
 

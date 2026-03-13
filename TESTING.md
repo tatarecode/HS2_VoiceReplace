@@ -23,6 +23,12 @@ The current suite intentionally focuses on stable, dependency-light logic first.
 .\tools\run_tests.cmd
 ```
 
+If you want tests to use a repository-local Python instead of a machine-wide install:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1
+```
+
 ## Run only one side
 
 ```powershell
@@ -75,6 +81,8 @@ This check requires a valid `GameRoot` with the expected BepInEx and Unity assem
 ## Notes
 
 - Python tests prefer `._tools\python310\python.exe` when it exists.
+- `tools/setup_local_python.ps1` installs the official embeddable Python 3.10.11 build plus the current Python test dependencies into `.\_tools\python310`.
+- Use `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1 -Force` to rebuild the repo-local Python from scratch.
 - If PowerShell script execution is restricted, use `.\tools\run_tests.cmd`.
 - C# tests use `xUnit` and `dotnet test`.
 - If you add user-facing strings or localization metadata, update the related C# tests as well.
