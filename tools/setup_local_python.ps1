@@ -1,8 +1,8 @@
 param(
-    [string]$DestinationDir = ".\_tools\python310",
-    [string]$PythonEmbedUrl = "https://www.python.org/ftp/python/3.10.11/python-3.10.11-embed-amd64.zip",
-    [string]$GetPipUrl = "https://bootstrap.pypa.io/get-pip.py",
-    [string[]]$Packages = @("numpy", "soundfile", "librosa"),
+    [string]$DestinationDir = "",
+    [string]$PythonEmbedUrl = "",
+    [string]$GetPipUrl = "",
+    [string[]]$Packages = @(),
     [switch]$SkipPackages,
     [switch]$Force
 )
@@ -11,6 +11,28 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
+
+function Get-RuntimeManifest {
+    $defaults = [ordered]@{
+        embed_version = "3.10.11"
+        embed_zip_url = "https://www.python.org/ftp/python/3.10.11/python-3.10.11-embed-amd64.zip"
+        get_pip_url = "https://bootstrap.pypa.io/get-pip.py"
+        repo_local_python_relative_path = "_tools/python310/python.exe"
+        repo_local_packages = @("numpy", "soundfile", "librosa")
+    }
+
+    $manifestPath = Join-Path $repoRoot "tools\python_runtime_manifest.json"
+    if (Test-Path $manifestPath) {
+        $loaded = Get-Content $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        foreach ($name in $defaults.Keys) {
+            if ($null -ne $loaded.$name -and @($loaded.$name).Count -gt 0) {
+                $defaults[$name] = $loaded.$name
+            }
+        }
+    }
+
+    return [pscustomobject]$defaults
+}
 
 function Get-AbsolutePath {
     param(
@@ -44,13 +66,18 @@ function Patch-EmbeddedPythonPth {
         [string]$PythonDir
     )
 
-    $pthPath = Join-Path $PythonDir "python310._pth"
-    if (-not (Test-Path $pthPath)) {
-        throw "Embedded Python path file was not found: $pthPath"
+    $pthPath = Get-ChildItem -Path $PythonDir -Filter "python*._pth" -File | Select-Object -First 1 -ExpandProperty FullName
+    if (-not $pthPath) {
+        throw "Embedded Python path file was not found under: $PythonDir"
+    }
+
+    $zipName = Get-ChildItem -Path $PythonDir -Filter "python*.zip" -File | Select-Object -First 1 -ExpandProperty Name
+    if (-not $zipName) {
+        $zipName = "python310.zip"
     }
 
     $lines = @(
-        "python310.zip",
+        $zipName,
         ".",
         "Lib",
         "Lib\site-packages",
@@ -101,6 +128,21 @@ function Install-EmbeddedPython {
             Remove-Item -Recurse -Force $tempRoot
         }
     }
+}
+
+$runtimeManifest = Get-RuntimeManifest
+if (-not $PSBoundParameters.ContainsKey("DestinationDir")) {
+    $relativePythonPath = ($runtimeManifest.repo_local_python_relative_path -replace "/", "\")
+    $DestinationDir = Split-Path -Parent $relativePythonPath
+}
+if (-not $PSBoundParameters.ContainsKey("PythonEmbedUrl")) {
+    $PythonEmbedUrl = $runtimeManifest.embed_zip_url
+}
+if (-not $PSBoundParameters.ContainsKey("GetPipUrl")) {
+    $GetPipUrl = $runtimeManifest.get_pip_url
+}
+if (-not $PSBoundParameters.ContainsKey("Packages")) {
+    $Packages = @($runtimeManifest.repo_local_packages)
 }
 
 $destinationFullPath = Get-AbsolutePath $DestinationDir

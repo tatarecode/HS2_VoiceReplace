@@ -47,7 +47,7 @@ This document is intended for a new developer starting from this export only.
 - Runtime plugin build depends on game-side Unity and BepInEx assemblies
 - Runtime execution may download external tools during dependency setup
 - Python tests can use a repo-local interpreter at `.\_tools\python310\python.exe`
-- `tools/setup_local_python.ps1` provisions that repo-local Python from the official embeddable Python distribution
+- `tools/setup_local_python.ps1` provisions that repo-local Python from the official embeddable Python distribution declared in `tools/python_runtime_manifest.json`
 
 ## Maintenance Guidance
 

@@ -24,6 +24,13 @@ GUI は、音声差し替えの一連の処理を管理します。
 1. GUI で選択した外部ツールルート
 2. 同梱 runtime assets のフォールバック
 
+## 既定のデータ保存先
+
+- GUI は、リポジトリ ルートを検出できる場合、既定でダウンロードしてきたこのフォルダ内の `.\.hs2voicereplace\` 配下に生成データを保存します。
+- リポジトリ ルートを検出できない場合は、実行ファイルの横に `.hs2voicereplace` フォルダを作成して使います。
+- 出力ルートは基本設定ダイアログから変更できます。
+- 依存セットアップや変換では、repo-local Python として `.\_tools\python310\python.exe` を再利用できます。
+
 ## 初回セットアップ
 
 1. GUI 上で外部ツールルートを確認
@@ -43,6 +50,8 @@ GUI は、音声差し替えの一連の処理を管理します。
 - `vgmstream-cli.exe` 用の vgmstream リリースアーカイブ
 - Seed-VC に必要な Python パッケージ
 - `noisereduce`
+
+`.\_tools\python310\python.exe` が既にある場合、依存セットアップは外部ツールルートへ別の embedded Python を展開せず、この repo-local Python を再利用します。
 
 `依存セットアップ` は `AssetsTools.NET.dll` を取得も同梱もしません。必要な source build では別途用意してください。
 

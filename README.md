@@ -56,6 +56,10 @@ Japanese documentation is available in `README_JA.md`.
     - `.\_tools\python310\python.exe`
   - Optional helper script:
     - `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1`
+- GUI-generated working data defaults to a repository-local folder when possible
+  - Default path in a repository checkout:
+    - `.\.hs2voicereplace\`
+  - The output root can be changed from the GUI basic settings dialog
 
 ### Runtime plugin
 

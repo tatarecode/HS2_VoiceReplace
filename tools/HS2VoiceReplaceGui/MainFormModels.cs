@@ -7,6 +7,11 @@ internal static class SampleAssetConstants
     public const string HashAlgorithmVersion = "sha256-file-v1";
 }
 
+internal sealed class BootstrapUiSettings
+{
+    public string? OutputRoot { get; set; }
+}
+
 internal sealed class PersistedUiSettings
 {
     public string? ExternalToolsRoot { get; set; }

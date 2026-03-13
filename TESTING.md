@@ -81,7 +81,7 @@ This check requires a valid `GameRoot` with the expected BepInEx and Unity assem
 ## Notes
 
 - Python tests prefer `._tools\python310\python.exe` when it exists.
-- `tools/setup_local_python.ps1` installs the official embeddable Python 3.10.11 build plus the current Python test dependencies into `.\_tools\python310`.
+- `tools/setup_local_python.ps1` installs the official embeddable Python declared in `tools/python_runtime_manifest.json` plus the current Python test dependencies into the repo-local path declared there.
 - Use `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1 -Force` to rebuild the repo-local Python from scratch.
 - If PowerShell script execution is restricted, use `.\tools\run_tests.cmd`.
 - C# tests use `xUnit` and `dotnet test`.

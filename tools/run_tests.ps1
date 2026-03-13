@@ -8,6 +8,22 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 
+function Get-RuntimeManifest {
+    $defaults = [ordered]@{
+        repo_local_python_relative_path = "_tools/python310/python.exe"
+    }
+
+    $manifestPath = Join-Path $repoRoot "tools\python_runtime_manifest.json"
+    if (Test-Path $manifestPath) {
+        $loaded = Get-Content $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        if (-not [string]::IsNullOrWhiteSpace($loaded.repo_local_python_relative_path)) {
+            $defaults.repo_local_python_relative_path = $loaded.repo_local_python_relative_path
+        }
+    }
+
+    return [pscustomobject]$defaults
+}
+
 function Invoke-CheckedCommand {
     param(
         [Parameter(Mandatory = $true)]
@@ -46,9 +62,11 @@ function Invoke-CheckedCommandWithRetry {
 }
 
 function Resolve-PythonExe {
+    $runtimeManifest = Get-RuntimeManifest
+    $repoLocalPython = Join-Path $repoRoot (($runtimeManifest.repo_local_python_relative_path -replace "/", "\"))
     $candidates = @(
         (Join-Path $repoRoot "_tools\rvc_webui\.venv\Scripts\python.exe"),
-        (Join-Path $repoRoot "_tools\python310\python.exe"),
+        $repoLocalPython,
         "python"
     )
     foreach ($candidate in $candidates) {

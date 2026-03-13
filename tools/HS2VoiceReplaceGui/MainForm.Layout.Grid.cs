@@ -11,7 +11,7 @@ public sealed partial class MainForm
 
             SyncGridRunRootWithSelectedPersonality(updateEmbeddedGrid: false);
             var suggested = string.IsNullOrWhiteSpace(_lastGridRunRoot)
-                ? Path.Combine(_outputRootFixed, "gui_runs", $"resume_c{GetSelectedPersonalityId():00}")
+                ? Path.Combine(_activeOutputRoot, "gui_runs", $"resume_c{GetSelectedPersonalityId():00}")
                 : _lastGridRunRoot;
 
             _embeddedGrid = new PartialRebuildGridDialog(
@@ -96,7 +96,7 @@ public sealed partial class MainForm
 
     private void SyncGridRunRootWithSelectedPersonality(bool updateEmbeddedGrid)
     {
-        var suggested = Path.Combine(_outputRootFixed, "gui_runs", $"resume_c{GetSelectedPersonalityId():00}");
+        var suggested = Path.Combine(_activeOutputRoot, "gui_runs", $"resume_c{GetSelectedPersonalityId():00}");
         _lastGridRunRoot = suggested;
         if (updateEmbeddedGrid)
             _embeddedGrid?.SetRunRoot(_lastGridRunRoot, reload: true);
@@ -105,9 +105,9 @@ public sealed partial class MainForm
     private void SetDefaults()
     {
         _txtBundleRoot.Text = _bundleRootFixed;
-        var defaultExternalRoot = Path.Combine(_outputRootFixed, "external_tools");
+        var defaultExternalRoot = Path.Combine(_activeOutputRoot, "external_tools");
         _txtExternalToolsRoot.Text = Environment.GetEnvironmentVariable("HS2VR_TOOLS_ROOT") ?? defaultExternalRoot;
-        _txtOutputRoot.Text = _outputRootFixed;
+        _txtOutputRoot.Text = _activeOutputRoot;
         _txtSourceHs2Root.Text = string.Empty;
         _txtDeployRoot.Text = string.Empty;
         ApplyV1NaturalPreset(_seedVc);
@@ -117,7 +117,7 @@ public sealed partial class MainForm
             _cmbPersonality.Items.Add(p);
         var defaultIndex = Array.FindIndex(PersonalityChoices, p => p.Id == 13);
         _cmbPersonality.SelectedIndex = defaultIndex >= 0 ? defaultIndex : 0;
-        _lastGridRunRoot = Path.Combine(_outputRootFixed, "gui_runs", $"resume_c{GetSelectedPersonalityId():00}");
+        _lastGridRunRoot = Path.Combine(_activeOutputRoot, "gui_runs", $"resume_c{GetSelectedPersonalityId():00}");
         RefreshSampleSignatureDisplay();
     }
 

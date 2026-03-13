@@ -211,6 +211,7 @@ internal static class UiTextCatalog
         ["log.cancelRequested"] = E("[cancel] 停止を要求しました", "[cancel] Stop requested."),
         ["log.adjustedPythonPth"] = E("python._pth を調整しました。", "Adjusted python._pth."),
         ["log.installPip"] = E("pip をインストールしています...", "Installing pip..."),
+        ["log.sharedPythonUsed"] = E("repo-local Python を再利用します: {0}", "Reusing the repo-local Python: {0}"),
         ["log.seedVcAlreadyExists"] = E("Seed-VC は既に存在します。", "Seed-VC already exists."),
         ["log.installSeedVcDeps"] = E("Seed-VC の依存関係をインストールしています（時間がかかる場合があります）", "Installing Seed-VC dependencies (this may take a while)."),
         ["log.noNvidiaGpu"] = E("NVIDIA GPU が見つからないため、torch は CPU 版のままにします。", "No NVIDIA GPU detected, so torch will remain on the CPU build."),
@@ -416,7 +417,7 @@ internal static class UiTextCatalog
         ["error.rebuildSourceMissing"] = E("再作成元の音声が見つかりません。relative_path={0}; checked={1}", "The rebuild source audio was not found. relative_path={0}; checked={1}"),
         ["error.partialInputNotInRun"] = E("入力 WAV がこの全量 run に属していません。run_root 配下の voice_extract_wav または voice_replace_wav を選択してください。", "The input WAV does not belong to this full run. Select a WAV under run_root/voice_extract_wav or run_root/voice_replace_wav."),
         ["error.partialSourceMissing"] = E("入力 WAV に対応する source_file が見つかりません。", "The source_file corresponding to the input WAV was not found."),
-        ["error.pipelinePythonMissing"] = E("Python が見つかりません。外部ツールルート配下に python/python.exe または rvc_venv/*/python.exe を配置してください。", "Python was not found. Place python/python.exe or rvc_venv/*/python.exe under the external tools root."),
+        ["error.pipelinePythonMissing"] = E("Python が見つかりません。外部ツールルート配下に python/python.exe または rvc_venv/*/python.exe を配置するか、repo 内の _tools/python310/python.exe を用意してください。", "Python was not found. Place python/python.exe or rvc_venv/*/python.exe under the external tools root, or provide _tools/python310/python.exe in the repository."),
         ["error.previewEtcWavMissing"] = E("preview 用の /etc wav を抽出できませんでした。", "Could not extract any /etc wav files for preview."),
         ["error.seedVcChunkFailed"] = E("Seed-VC chunk の実行に失敗しました。chunk={0}, manifest={1}, report={2}", "Seed-VC chunk execution failed. chunk={0}, manifest={1}, report={2}"),
     };

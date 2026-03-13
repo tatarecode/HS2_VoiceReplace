@@ -55,6 +55,10 @@ HS2VoiceReplace は、Honey Select 2 の音声差し替えを行うための C# 
     - `.\_tools\python310\python.exe`
   - 任意の補助スクリプト:
     - `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1`
+- GUI が生成する作業データは、可能な場合はリポジトリ内ローカル フォルダを既定で使用します
+  - リポジトリ checkout 時の既定パス:
+    - `.\.hs2voicereplace\`
+  - 出力ルートは GUI の基本設定ダイアログから変更できます
 
 ### Runtime plugin
 

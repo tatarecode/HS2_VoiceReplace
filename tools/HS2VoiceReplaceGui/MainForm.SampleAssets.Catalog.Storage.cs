@@ -29,15 +29,15 @@ public sealed partial class MainForm
     {
         if (Path.IsPathRooted(item.RelativeWavPath))
             return item.RelativeWavPath;
-        return Path.GetFullPath(Path.Combine(_outputRootFixed, item.RelativeWavPath));
+        return Path.GetFullPath(Path.Combine(_activeOutputRoot, item.RelativeWavPath));
     }
 
     private string ToRelativeUnderOutput(string fullPath)
     {
         var full = Path.GetFullPath(fullPath);
-        if (!full.StartsWith(_outputRootFixed, StringComparison.OrdinalIgnoreCase))
+        if (!full.StartsWith(_activeOutputRoot, StringComparison.OrdinalIgnoreCase))
             return full;
-        return Path.GetRelativePath(_outputRootFixed, full);
+        return Path.GetRelativePath(_activeOutputRoot, full);
     }
 
     private void SaveSampleAssetsCatalog()

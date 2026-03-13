@@ -14,7 +14,7 @@ public sealed partial class MainForm : Form
 {
     private readonly TextBox _txtBundleRoot = new() { Dock = DockStyle.Fill, ReadOnly = true, TabStop = false };
     private readonly TextBox _txtExternalToolsRoot = new() { Dock = DockStyle.Fill };
-    private readonly TextBox _txtOutputRoot = new() { Dock = DockStyle.Fill, ReadOnly = true, TabStop = false };
+    private readonly TextBox _txtOutputRoot = new() { Dock = DockStyle.Fill };
     private readonly TextBox _txtSourceHs2Root = new() { Dock = DockStyle.Fill };
     private readonly TextBox _txtDeployRoot = new() { Dock = DockStyle.Fill };
     private readonly ComboBox _cmbPersonality = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 220 };
@@ -60,12 +60,14 @@ public sealed partial class MainForm : Form
 
     private CancellationTokenSource? _cts;
     private readonly string _bundleRootFixed;
-    private readonly string _outputRootFixed;
-    private string UiSettingsPath => Path.Combine(_outputRootFixed, "ui_settings.json");
-    private string SampleAssetsCatalogPath => Path.Combine(_outputRootFixed, "sample_assets.json");
-    private string SampleAssetsRoot => Path.Combine(_outputRootFixed, "sample_assets");
+    private readonly string _defaultOutputRoot;
+    private string _activeOutputRoot;
+    private string UiSettingsPath => Path.Combine(_activeOutputRoot, "ui_settings.json");
+    private string SampleAssetsCatalogPath => Path.Combine(_activeOutputRoot, "sample_assets.json");
+    private string SampleAssetsRoot => Path.Combine(_activeOutputRoot, "sample_assets");
     private string SampleAssetsActiveRoot => Path.Combine(SampleAssetsRoot, "active");
     private string SampleAssetsTrashRoot => Path.Combine(SampleAssetsRoot, "trash");
+    private string BootstrapSettingsPath => Path.Combine(AppContext.BaseDirectory, "HS2VoiceReplaceGui.bootstrap.json");
     private SplitContainer? _mainSplit;
     private UiLanguage _uiLanguage = UiLanguage.Ja;
     private SeedVcUiSettings _seedVc = SeedVcUiSettings.CreateDefault();
@@ -105,9 +107,8 @@ public sealed partial class MainForm : Form
     public MainForm()
     {
         _bundleRootFixed = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "runtime_bundle"));
-        _outputRootFixed = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "HS2VoiceReplace");
+        _defaultOutputRoot = BuildDefaultOutputRoot(AppContext.BaseDirectory);
+        _activeOutputRoot = _defaultOutputRoot;
         LocalizationState.CurrentLanguage = _uiLanguage;
         Text = UiTextCatalog.Get(_uiLanguage, "app.title");
         Width = 1360;
@@ -119,6 +120,7 @@ public sealed partial class MainForm : Form
 
         BuildLayout();
         SetDefaults();
+        LoadBootstrapSettings();
         LoadUiSettings();
         SyncGridRunRootWithSelectedPersonality(updateEmbeddedGrid: false);
         LoadSampleAssets();
@@ -142,6 +144,7 @@ public sealed partial class MainForm : Form
         _btnClearEroSegment.Click += (_, _) => ClearManualRange(isEro: true);
         _txtSourceHs2Root.TextChanged += (_, _) => RefreshActionAvailability();
         _txtDeployRoot.TextChanged += (_, _) => RefreshActionAvailability();
+        _txtOutputRoot.Leave += (_, _) => ApplyOutputRootChangeFromUi(reloadSampleAssets: true);
         _cmbPersonality.SelectedIndexChanged += (_, _) =>
         {
             SyncGridRunRootWithSelectedPersonality(updateEmbeddedGrid: true);

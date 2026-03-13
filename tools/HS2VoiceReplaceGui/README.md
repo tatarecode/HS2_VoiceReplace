@@ -24,6 +24,13 @@ The GUI coordinates the full voice-replacement workflow:
 1. External tools root selected in the GUI
 2. Bundled runtime assets as fallback
 
+## Default Data Location
+
+- By default, the GUI stores generated data under `.\.hs2voicereplace\` inside the downloaded repository folder when it can detect the repository root.
+- If no repository root is detected, it falls back to a `.hs2voicereplace` folder next to the executable.
+- You can change the output root from the basic settings dialog.
+- The GUI can also reuse the repo-local Python at `.\_tools\python310\python.exe` for dependency setup and conversion.
+
 ## Initial Setup
 
 1. Verify the external tools root in the GUI
@@ -43,6 +50,8 @@ The GUI coordinates the full voice-replacement workflow:
 - vgmstream release archive for `vgmstream-cli.exe`
 - Required Seed-VC Python packages
 - `noisereduce`
+
+If `.\_tools\python310\python.exe` already exists, setup reuses that repo-local Python instead of downloading a separate embedded Python into the external tools root.
 
 `Setup Dependencies` does not download or vendor `AssetsTools.NET.dll`. Source builds that need it must obtain it separately.
 

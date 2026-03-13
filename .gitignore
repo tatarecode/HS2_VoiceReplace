@@ -3,6 +3,8 @@
 **/publish/
 **/.test_artifacts/
 .dotnet_cli_home/
+.hs2voicereplace/
+HS2VoiceReplaceGui.bootstrap.json
 _tools/uabea/v8/AssetsTools.NET.dll
 _tools/python310/
 **/__pycache__/

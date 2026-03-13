@@ -6,8 +6,6 @@ namespace HS2VoiceReplace;
 
 internal static partial class DependencyBootstrapper
 {
-    private const string PythonEmbedUrl = "https://www.python.org/ftp/python/3.10.11/python-3.10.11-embed-amd64.zip";
-    private const string GetPipUrl = "https://bootstrap.pypa.io/get-pip.py";
     private const string SeedVcZipUrl = "https://github.com/Plachtaa/seed-vc/archive/refs/heads/main.zip";
     private const string UabeaLatestApiUrl = "https://api.github.com/repos/nesrak1/UABEA/releases/latest";
     private const string VgmstreamLatestApiUrl = "https://api.github.com/repos/vgmstream/vgmstream/releases/latest";
@@ -47,17 +45,30 @@ internal static partial class DependencyBootstrapper
             if (ready()) MarkDone(step);
         }
 
+        var sourceRoots = EnumerateSourceRoots(bundledRoot).ToArray();
+        var pythonManifest = PythonRuntimeManifest.Load(sourceRoots);
+        var sharedPythonExe = FindSharedPythonExe(sourceRoots, pythonManifest);
         var pythonDir = Path.Combine(externalRoot, "python");
         string? pythonExe = null;
         await RunStep(
             "python",
-            () => File.Exists(Path.Combine(pythonDir, "python.exe")),
+            () => (!string.IsNullOrWhiteSpace(sharedPythonExe) && File.Exists(sharedPythonExe)) || File.Exists(Path.Combine(pythonDir, "python.exe")),
             async () =>
             {
-                pythonExe = await EnsurePythonAsync(pythonDir, dlRoot, externalRoot, log, ct);
+                if (!string.IsNullOrWhiteSpace(sharedPythonExe) && File.Exists(sharedPythonExe))
+                {
+                    pythonExe = sharedPythonExe;
+                    log(L("log.sharedPythonUsed", sharedPythonExe));
+                    return;
+                }
+
+                pythonExe = await EnsurePythonAsync(pythonDir, dlRoot, externalRoot, log, ct, pythonManifest);
             });
-        pythonExe ??= Path.Combine(pythonDir, "python.exe");
+        pythonExe ??= !string.IsNullOrWhiteSpace(sharedPythonExe) && File.Exists(sharedPythonExe)
+            ? sharedPythonExe
+            : Path.Combine(pythonDir, "python.exe");
         if (!File.Exists(pythonExe)) throw new InvalidOperationException(L("error.pythonMissing"));
+        var sitePackagesRoot = GetPythonSitePackagesRoot(pythonExe);
 
         var seedRoot = Path.Combine(externalRoot, "seed_vc_v2");
         await RunStep(
@@ -87,8 +98,8 @@ internal static partial class DependencyBootstrapper
         await RunStep(
             "pip_packages",
             () =>
-                Directory.Exists(Path.Combine(pythonDir, "Lib", "site-packages", "noisereduce")) &&
-                Directory.Exists(Path.Combine(pythonDir, "Lib", "site-packages", "torch")) &&
+                Directory.Exists(Path.Combine(sitePackagesRoot, "noisereduce")) &&
+                Directory.Exists(Path.Combine(sitePackagesRoot, "torch")) &&
                 (!HasLikelyNvidiaSmi() || File.Exists(Path.Combine(stateRoot, "torch_cuda.ok"))),
             async () => await EnsurePipPackagesAsync(pythonExe, seedRoot, externalRoot, stateRoot, log, ct));
 
@@ -112,14 +123,14 @@ internal static partial class DependencyBootstrapper
             });
     }
 
-    private static async Task<string> EnsurePythonAsync(string pythonDir, string dlRoot, string workDir, Action<string> log, CancellationToken ct)
+    private static async Task<string> EnsurePythonAsync(string pythonDir, string dlRoot, string workDir, Action<string> log, CancellationToken ct, PythonRuntimeManifest pythonManifest)
     {
         var pyExe = Path.Combine(pythonDir, "python.exe");
         if (!File.Exists(pyExe))
         {
             Directory.CreateDirectory(pythonDir);
-            var pyZip = Path.Combine(dlRoot, "python-3.10.11-embed-amd64.zip");
-            await DownloadFileAsync(PythonEmbedUrl, pyZip, log, ct);
+            var pyZip = Path.Combine(dlRoot, pythonManifest.GetEmbedZipFileName());
+            await DownloadFileAsync(pythonManifest.EmbedZipUrl, pyZip, log, ct);
             ExtractZip(pyZip, pythonDir, stripSingleRoot: false);
             PatchEmbeddedPythonPth(pythonDir, log);
         }
@@ -129,7 +140,7 @@ internal static partial class DependencyBootstrapper
             throw new InvalidOperationException(L("error.embeddedPythonExtractFailed"));
 
         var getPip = Path.Combine(dlRoot, "get-pip.py");
-        await DownloadFileAsync(GetPipUrl, getPip, log, ct);
+        await DownloadFileAsync(pythonManifest.GetPipUrl, getPip, log, ct);
 
         log(L("log.installPip"));
         await ProcessUtil.RunAsync(pyExe, $"\"{getPip}\" --disable-pip-version-check", workDir, log, ct);
@@ -283,6 +294,21 @@ internal static partial class DependencyBootstrapper
         {
         }
         return false;
+    }
+
+    private static string GetPythonSitePackagesRoot(string pythonExe)
+        => Path.Combine(Path.GetDirectoryName(Path.GetFullPath(pythonExe))!, "Lib", "site-packages");
+
+    private static string? FindSharedPythonExe(IEnumerable<string> roots, PythonRuntimeManifest pythonManifest)
+    {
+        foreach (var root in roots)
+        {
+            var candidate = pythonManifest.GetRepoLocalPythonFullPath(root);
+            if (File.Exists(candidate))
+                return candidate;
+        }
+
+        return null;
     }
 
     private static string L(string key, params object[] args) => UiTextCatalog.Get(LocalizationState.CurrentLanguage, key, args);

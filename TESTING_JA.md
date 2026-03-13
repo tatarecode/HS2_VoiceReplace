@@ -81,7 +81,7 @@ dotnet build .\runtime\HS2VoiceReplace.Runtime\HS2VoiceReplace.Runtime.csproj -c
 ## 補足
 
 - Python テストは `._tools\python310\python.exe` があればそれを優先します。
-- `tools/setup_local_python.ps1` は、公式の embeddable Python 3.10.11 と現在の Python テスト依存を `.\_tools\python310` にセットアップします。
+- `tools/setup_local_python.ps1` は、`tools/python_runtime_manifest.json` で定義した公式の embeddable Python と現在の Python テスト依存を、同 manifest で定義された repo-local パスにセットアップします。
 - repo-local Python を最初から作り直したい場合は `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1 -Force` を使ってください。
 - PowerShell の実行制限がある場合は `.\tools\run_tests.cmd` を使ってください。
 - C# テストは `xUnit` と `dotnet test` を使用します。

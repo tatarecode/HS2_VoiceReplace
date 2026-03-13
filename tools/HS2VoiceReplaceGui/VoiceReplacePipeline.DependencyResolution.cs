@@ -100,6 +100,12 @@ private static string GetSeedVcInferScriptName(SeedVcUiSettings seed)
         {
             list.Add(Path.Combine("tools", parts[1]));
         }
+        if (parts.Length == 2 &&
+            string.Equals(parts[0], "mods_template", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(parts[1], "HS2VoiceReplaceRuntime", StringComparison.OrdinalIgnoreCase))
+        {
+            list.Add(Path.Combine("mods_src", parts[1]));
+        }
         return list;
     }
 
@@ -114,12 +120,14 @@ private static string GetSeedVcInferScriptName(SeedVcUiSettings seed)
     private static string ResolvePythonExe(PipelineOptions o)
     {
         var roots = EnumerateDependencyRoots(o).ToList();
+        var pythonManifest = PythonRuntimeManifest.Load(roots);
 
         var relCandidates = new[]
         {
             Path.Combine("rvc_venv", "Scripts", "python.exe"),
             Path.Combine("rvc_venv", ".venv", "Scripts", "python.exe"),
             Path.Combine("python", "python.exe"),
+            pythonManifest.RepoLocalPythonRelativePath,
             Path.Combine("seed_vc_v2", ".venv", "Scripts", "python.exe"),
         };
 

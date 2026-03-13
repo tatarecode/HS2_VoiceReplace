@@ -16,7 +16,7 @@ public sealed partial class MainForm
         try { srcFull = Path.GetFullPath(sourceFile); }
         catch { return null; }
 
-        var runRoot = Path.Combine(_outputRootFixed, "gui_runs");
+        var runRoot = Path.Combine(_activeOutputRoot, "gui_runs");
         if (!Directory.Exists(runRoot))
             return null;
 

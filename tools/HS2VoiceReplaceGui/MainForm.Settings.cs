@@ -10,6 +10,7 @@ public sealed partial class MainForm
     {
         try
         {
+            ApplyOutputRootChangeFromUi(reloadSampleAssets: false);
             if (!File.Exists(UiSettingsPath))
                 return;
             var json = File.ReadAllText(UiSettingsPath, Encoding.UTF8);
@@ -66,9 +67,11 @@ public sealed partial class MainForm
     {
         try
         {
+            ApplyOutputRootChangeFromUi(reloadSampleAssets: false);
             EnsureSelectedSampleAssets();
             SyncSelectedSampleAssetsToTextFields();
-            Directory.CreateDirectory(_outputRootFixed);
+            Directory.CreateDirectory(_activeOutputRoot);
+            SaveBootstrapSettings();
             if (_embeddedGrid is { IsDisposed: false } && !string.IsNullOrWhiteSpace(_embeddedGrid.RunRoot))
                 _lastGridRunRoot = _embeddedGrid.RunRoot;
             var s = new PersistedUiSettings

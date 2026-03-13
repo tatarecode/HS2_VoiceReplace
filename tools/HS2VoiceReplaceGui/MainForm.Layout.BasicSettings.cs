@@ -32,7 +32,7 @@ public sealed partial class MainForm
         table.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 300));
         var row = 0;
         AddReadonlyRow(table, ref row, T("general.bundledRuntimeRoot"), _txtBundleRoot);
-        AddReadonlyRow(table, ref row, T("general.outputRoot"), _txtOutputRoot);
+        AddPathRow(table, ref row, T("general.outputRoot"), _txtOutputRoot, false, PathMode.Folder);
         AddPathRow(table, ref row, T("general.externalToolsRoot"), _txtExternalToolsRoot, false, PathMode.Folder);
         AddPathRow(table, ref row, T("general.sourceHs2Root"), _txtSourceHs2Root, true, PathMode.Folder);
         AddPathRow(table, ref row, T("general.deployHs2Root"), _txtDeployRoot, true, PathMode.Folder);

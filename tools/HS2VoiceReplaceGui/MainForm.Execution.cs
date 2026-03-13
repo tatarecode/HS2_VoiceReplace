@@ -13,8 +13,9 @@ public sealed partial class MainForm
 
         try
         {
+            ApplyOutputRootChangeFromUi(reloadSampleAssets: false);
             var root = string.IsNullOrWhiteSpace(_txtExternalToolsRoot.Text)
-                ? Path.Combine(_outputRootFixed, "external_tools")
+                ? Path.Combine(_activeOutputRoot, "external_tools")
                 : Path.GetFullPath(_txtExternalToolsRoot.Text.Trim());
 
             AppendLog($"setup root: {root}");
@@ -84,7 +85,7 @@ public sealed partial class MainForm
         try
         {
             TouchSelectedSampleAssetsAsUsed();
-            var previewRunRoot = Path.Combine(_outputRootFixed, "gui_runs", $"preview_c{GetSelectedPersonalityId():00}");
+            var previewRunRoot = Path.Combine(_activeOutputRoot, "gui_runs", $"preview_c{GetSelectedPersonalityId():00}");
             var options = BuildOptions(previewRunRoot);
             var result = await _appService.RunPreviewAsync(options, AppendLog, _cts.Token);
 
@@ -237,6 +238,7 @@ public sealed partial class MainForm
 
     private PipelineOptions BuildOptions(string? runRootOverride = null, bool deployToBackup = false)
     {
+        ApplyOutputRootChangeFromUi(reloadSampleAssets: false);
         string ResolveUserPath(string p) => Path.GetFullPath(Environment.ExpandEnvironmentVariables(p));
         EnsureSelectedSampleAssets();
         SyncSelectedSampleAssetsToTextFields();
@@ -254,7 +256,7 @@ public sealed partial class MainForm
         {
             BundleRoot = _bundleRootFixed,
             ExternalToolsRoot = string.IsNullOrWhiteSpace(_txtExternalToolsRoot.Text) ? "" : ResolveUserPath(_txtExternalToolsRoot.Text.Trim()),
-            OutputBaseRoot = _outputRootFixed,
+            OutputBaseRoot = _activeOutputRoot,
             SourceHs2Root = Path.GetFullPath(_txtSourceHs2Root.Text.Trim()),
             DeployHs2Root = Path.GetFullPath(_txtDeployRoot.Text.Trim()),
             TargetPersonalityId = GetSelectedPersonalityId(),
@@ -277,7 +279,7 @@ public sealed partial class MainForm
     }
 
     private string GetCurrentRunRoot()
-        => Path.Combine(_outputRootFixed, "gui_runs", $"resume_c{GetSelectedPersonalityId():00}");
+        => Path.Combine(_activeOutputRoot, "gui_runs", $"resume_c{GetSelectedPersonalityId():00}");
 
     private bool HasAssignedSampleAudio()
     {

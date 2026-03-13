@@ -47,7 +47,7 @@
 - runtime plugin のビルドには Unity / BepInEx の game-side DLL が必要です。
 - 実行時には依存セットアップで外部ツールを取得する場合があります。
 - Python テストは `.\_tools\python310\python.exe` の repo-local Python を利用できます。
-- `tools/setup_local_python.ps1` は、公式の embeddable Python からその repo-local Python をセットアップします。
+- `tools/setup_local_python.ps1` は、`tools/python_runtime_manifest.json` で定義した公式の embeddable Python からその repo-local Python をセットアップします。
 
 ## 保守上の注意
 
