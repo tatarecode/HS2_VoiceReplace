@@ -47,3 +47,39 @@ def write_silence_fallback(src: str, out_file: str) -> None:
     y_zero = np.zeros_like(y_src, dtype=np.float32)
     os.makedirs(os.path.dirname(out_file), exist_ok=True)
     sf.write(out_file, y_zero, sr_src)
+
+
+def match_output_loudness_to_source(
+    y_out: np.ndarray,
+    y_src: np.ndarray,
+    *,
+    activity_ratio: float = 0.05,
+    silence_floor: float = 1.0e-4,
+    min_gain: float = 0.25,
+    max_gain: float = 4.0,
+) -> np.ndarray:
+    """Scale converted audio so its active-region RMS follows the source clip."""
+    y_out_arr = np.asarray(y_out, dtype=np.float32)
+    y_src_arr = np.asarray(y_src, dtype=np.float32)
+    n = min(len(y_out_arr), len(y_src_arr))
+    if n <= 0:
+        return y_out_arr
+
+    src_aligned = y_src_arr[:n]
+    out_aligned = y_out_arr[:n]
+    src_abs = np.abs(src_aligned)
+
+    threshold = max(float(silence_floor), float(np.max(src_abs)) * float(activity_ratio))
+    active_mask = src_abs >= threshold
+    if not np.any(active_mask):
+        active_mask = src_abs > float(silence_floor)
+    if not np.any(active_mask):
+        active_mask = np.ones(n, dtype=bool)
+
+    src_rms = float(np.sqrt(np.mean(np.square(src_aligned[active_mask]), dtype=np.float64)))
+    out_rms = float(np.sqrt(np.mean(np.square(out_aligned[active_mask]), dtype=np.float64)))
+    if src_rms <= 1.0e-8 or out_rms <= 1.0e-8:
+        return y_out_arr
+
+    gain = float(np.clip(src_rms / out_rms, min_gain, max_gain))
+    return (y_out_arr * gain).astype(np.float32)

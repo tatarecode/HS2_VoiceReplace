@@ -140,7 +140,7 @@ public sealed partial class MainForm
         previewPanel.Controls.Add(_btnPlayPreviewEro, 2, 1);
         var previewAction = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, WrapContents = true };
         previewAction.Controls.Add(_btnPreview);
-        _btnSampleDialogCancel = new Button { Text = T("button.stop"), Width = 120, Height = 36, Enabled = _cts != null };
+        _btnSampleDialogCancel = new Button { Text = T("button.stop"), Width = 120, Height = 36, Enabled = _isBusy };
         UiSizeHelper.FitButton(_btnSampleDialogCancel, 90, 36);
         _btnSampleDialogCancel.Click += (_, _) => _cts?.Cancel();
         previewAction.Controls.Add(_btnSampleDialogCancel);

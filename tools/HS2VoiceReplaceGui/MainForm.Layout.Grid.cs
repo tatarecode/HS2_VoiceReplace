@@ -115,7 +115,7 @@ public sealed partial class MainForm
         _cmbPersonality.Items.Clear();
         foreach (var p in PersonalityChoices)
             _cmbPersonality.Items.Add(p);
-        var defaultIndex = Array.FindIndex(PersonalityChoices, p => p.Id == 13);
+        var defaultIndex = Array.FindIndex(PersonalityChoices, p => p.Id == 0);
         _cmbPersonality.SelectedIndex = defaultIndex >= 0 ? defaultIndex : 0;
         _lastGridRunRoot = Path.Combine(_activeOutputRoot, "gui_runs", $"resume_c{GetSelectedPersonalityId():00}");
         RefreshSampleSignatureDisplay();

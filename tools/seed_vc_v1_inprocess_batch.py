@@ -15,10 +15,16 @@ import soundfile as sf
 import torch
 from scipy.signal import butter, sosfiltfilt
 
+# Embedded Python with python._pth may not include the script directory on sys.path.
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, SCRIPT_DIR)
+
 from python_cli_common import read_manifest_rows
 from seed_vc_batch_common import (
     build_failure_note,
     copy_source_fallback,
+    match_output_loudness_to_source,
     write_seed_vc_report,
     write_silence_fallback,
 )
@@ -447,6 +453,7 @@ def main() -> int:
                         high_hz=args.deesser_high_hz,
                         strength=args.deesser_strength,
                     )
+                wav = match_output_loudness_to_source(wav, y_src)
                 peak = float(np.max(np.abs(wav)) + 1e-8)
                 if peak > 0.995:
                     wav = (wav * (0.995 / peak)).astype(np.float32)

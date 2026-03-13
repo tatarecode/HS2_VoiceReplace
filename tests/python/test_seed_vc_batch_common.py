@@ -82,6 +82,38 @@ class SeedVcBatchCommonTests(unittest.TestCase):
         self.assertEqual(len(y), len(out))
         self.assertTrue(np.allclose(out, 0.0, atol=1e-6))
 
+    def test_match_output_loudness_to_source_matches_active_region_rms(self) -> None:
+        src = np.concatenate(
+            [
+                np.zeros(400, dtype=np.float32),
+                np.full(1200, 0.5, dtype=np.float32),
+                np.zeros(400, dtype=np.float32),
+            ]
+        )
+        out = np.concatenate(
+            [
+                np.zeros(400, dtype=np.float32),
+                np.full(1200, 0.2, dtype=np.float32),
+                np.zeros(400, dtype=np.float32),
+            ]
+        )
+
+        matched = common.match_output_loudness_to_source(out, src)
+        active = np.abs(src) >= 0.025
+        src_rms = float(np.sqrt(np.mean(np.square(src[active]), dtype=np.float64)))
+        matched_rms = float(np.sqrt(np.mean(np.square(matched[active]), dtype=np.float64)))
+
+        self.assertAlmostEqual(src_rms, matched_rms, places=5)
+
+    def test_match_output_loudness_to_source_scales_full_output_using_aligned_region(self) -> None:
+        src = np.full(1000, 0.4, dtype=np.float32)
+        out = np.full(1400, 0.1, dtype=np.float32)
+
+        matched = common.match_output_loudness_to_source(out, src)
+
+        self.assertEqual(len(out), len(matched))
+        self.assertTrue(np.allclose(matched, 0.4, atol=1e-6))
+
 
 if __name__ == "__main__":
     unittest.main()

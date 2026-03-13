@@ -59,6 +59,7 @@ public sealed partial class MainForm : Form
     private Form? _sampleAudioDialog;
 
     private CancellationTokenSource? _cts;
+    private bool _isBusy;
     private readonly string _bundleRootFixed;
     private readonly string _defaultOutputRoot;
     private string _activeOutputRoot;

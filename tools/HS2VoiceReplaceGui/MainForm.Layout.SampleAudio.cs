@@ -13,7 +13,7 @@ public sealed partial class MainForm
         {
             RefreshSampleSignatureDisplay();
             if (_btnSampleDialogCancel != null && !_btnSampleDialogCancel.IsDisposed)
-                _btnSampleDialogCancel.Enabled = _cts != null;
+                _btnSampleDialogCancel.Enabled = _isBusy;
             _sampleAudioDialog.Show(this);
             _sampleAudioDialog.BringToFront();
             return;

@@ -226,6 +226,7 @@ public sealed partial class MainForm
 
     private void SetBusyState(bool isBusy)
     {
+        _isBusy = isBusy;
         _btnSeedVcSettings.Enabled = true;
         if (_btnSampleDialogCancel != null && !_btnSampleDialogCancel.IsDisposed)
             _btnSampleDialogCancel.Enabled = isBusy;
@@ -275,7 +276,7 @@ public sealed partial class MainForm
     {
         if (_cmbPersonality.SelectedItem is PersonalityChoiceItem item)
             return item.Id;
-        return 13;
+        return 0;
     }
 
     private string GetCurrentRunRoot()
@@ -353,7 +354,7 @@ public sealed partial class MainForm
 
     private void RefreshActionAvailability()
     {
-        var isBusy = _cts != null;
+        var isBusy = _isBusy;
         _btnSetup.Enabled = !isBusy;
         _btnExtract.Enabled = !isBusy && Directory.Exists(_txtSourceHs2Root.Text.Trim());
         _btnPreview.Enabled = !isBusy && CanPreview();

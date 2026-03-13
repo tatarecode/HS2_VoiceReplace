@@ -10,6 +10,8 @@ internal static partial class DependencyBootstrapper
     {
         var roots = EnumerateSourceRoots(bundledRoot).ToArray();
 
+        await EnsureScriptAsync(externalRoot, roots, "python_cli_common.py");
+        await EnsureScriptAsync(externalRoot, roots, "seed_vc_batch_common.py");
         await EnsureScriptAsync(externalRoot, roots, "seed_vc_v1_inprocess_batch.py");
         await EnsureScriptAsync(externalRoot, roots, "seed_vc_v2_inprocess_batch.py");
         await EnsureScriptAsync(externalRoot, roots, "select_voice_style_segment.py");
@@ -178,6 +180,8 @@ internal static partial class DependencyBootstrapper
     {
         var rels = new[]
         {
+            Path.Combine("scripts", "python_cli_common.py"),
+            Path.Combine("scripts", "seed_vc_batch_common.py"),
             Path.Combine("scripts", "seed_vc_v1_inprocess_batch.py"),
             Path.Combine("scripts", "seed_vc_v2_inprocess_batch.py"),
             Path.Combine("scripts", "select_voice_style_segment.py"),

@@ -106,6 +106,8 @@ internal static partial class DependencyBootstrapper
         await RunStep(
             "aux",
             () =>
+                File.Exists(Path.Combine(externalRoot, "scripts", "python_cli_common.py")) &&
+                File.Exists(Path.Combine(externalRoot, "scripts", "seed_vc_batch_common.py")) &&
                 File.Exists(Path.Combine(externalRoot, "scripts", "seed_vc_v1_inprocess_batch.py")) &&
                 File.Exists(Path.Combine(externalRoot, "scripts", "seed_vc_v2_inprocess_batch.py")) &&
                 File.Exists(Path.Combine(externalRoot, "scripts", "select_voice_style_segment.py")) &&

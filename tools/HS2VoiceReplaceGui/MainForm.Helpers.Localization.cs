@@ -75,7 +75,7 @@ public sealed partial class MainForm
         ReflowLayout();
         RecreateEmbeddedGrid();
         RefreshSampleSignatureDisplay();
-        SetBusyState(_cts != null);
+        SetBusyState(_isBusy);
     }
 
     private void DetachDialogHostedSharedControls()
