@@ -1,4 +1,4 @@
-﻿# HS2VoiceReplace
+# HS2VoiceReplace
 
 HS2VoiceReplace is a C# GUI tool for replacing Honey Select 2 voice assets without directly editing a live game installation.
 
@@ -8,8 +8,8 @@ Japanese documentation is available in `README_JA.md`.
 
 ## Repository Layout
 
-- `tools/HS2VoiceReplace`
-  - Main WinForms GUI application
+- `tools/HS2VoiceReplaceGui`
+  - Main WinForms GUI application (`HS2VoiceReplaceGui.exe`)
 - `runtime/HS2VoiceReplace.Runtime`
   - Runtime plugin project used by deployed voice-replacement packages
 - `tools/UabAudioClipPatcher`
@@ -67,7 +67,7 @@ The runtime plugin project intentionally does not vendor those game-side assembl
 ## Build
 
 ```powershell
-dotnet build .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release
+dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release
 dotnet build .\tools\UabAudioClipPatcher\UabAudioClipPatcher.csproj -c Release
 ```
 
@@ -75,7 +75,7 @@ If `AssetsTools.NET.dll` is not present at the default path, provide it explicit
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_assetstools.ps1
-dotnet build .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
+dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
 dotnet build .\tools\UabAudioClipPatcher\UabAudioClipPatcher.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
 ```
 
@@ -96,19 +96,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\run_tests.ps1
 ## Main Development Entry Points
 
 - GUI application:
-  - `tools/HS2VoiceReplace/MainForm.cs`
+  - `tools/HS2VoiceReplaceGui/MainForm.cs`
 - Pipeline orchestration:
-  - `tools/HS2VoiceReplace/VoiceReplacePipeline.cs`
+  - `tools/HS2VoiceReplaceGui/VoiceReplacePipeline.cs`
 - Application service layer:
-  - `tools/HS2VoiceReplace/ApplicationServices.cs`
+  - `tools/HS2VoiceReplaceGui/ApplicationServices.cs`
 - Localization catalog:
-  - `tools/HS2VoiceReplace/UiTextCatalog.cs`
+  - `tools/HS2VoiceReplaceGui/UiTextCatalog.cs`
 
 ## Additional Notes
 
 - `DEVELOPMENT.md` and `DEVELOPMENT_JA.md` describe the code layout and maintenance entry points.
 - `TESTING.md` and `TESTING_JA.md` describe how to run automated tests.
-- `tools/HS2VoiceReplace/README.md` and `tools/HS2VoiceReplace/README_JA.md` document tool-specific behavior and dependency setup.
+- `tools/HS2VoiceReplaceGui/README.md` and `tools/HS2VoiceReplaceGui/README_JA.md` document tool-specific behavior and dependency setup.
 - `tools/UabAudioClipPatcher/README.md` and `tools/UabAudioClipPatcher/README_JA.md` document the bundle patcher and its build prerequisites.
 - `runtime/HS2VoiceReplace.Runtime/README.md` and `runtime/HS2VoiceReplace.Runtime/README_JA.md` document the runtime plugin project and its game-side dependencies.
 

@@ -1,11 +1,11 @@
-﻿# Development Notes
+# Development Notes
 
 This document is intended for a new developer starting from this export only.
 
 ## Recommended First Steps
 
 1. Read `README.md`
-2. Read `tools/HS2VoiceReplace/README.md`
+2. Read `tools/HS2VoiceReplaceGui/README.md`
 3. Run the automated tests
 4. Verify local build prerequisites for the GUI and runtime plugin
 
@@ -17,7 +17,7 @@ This document is intended for a new developer starting from this export only.
 
 ## Architectural Orientation
 
-- UI code lives under `tools/HS2VoiceReplace`
+- UI code lives under `tools/HS2VoiceReplaceGui`
 - The codebase has already been split into:
   - UI partials
   - application services

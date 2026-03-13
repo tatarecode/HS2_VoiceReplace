@@ -5,7 +5,7 @@
 ## 最初に読むもの
 
 1. `README.md` または `README_JA.md`
-2. `tools/HS2VoiceReplace/README.md` または `tools/HS2VoiceReplace/README_JA.md`
+2. `tools/HS2VoiceReplaceGui/README.md` または `tools/HS2VoiceReplaceGui/README_JA.md`
 3. 自動テストの実行結果
 4. GUI と runtime plugin のビルド前提
 
@@ -17,7 +17,7 @@
 
 ## 構成の見方
 
-- UI 実装は `tools/HS2VoiceReplace` 配下にあります。
+- UI 実装は `tools/HS2VoiceReplaceGui` 配下にあります。
 - コードは大きく次の単位に分かれています。
   - UI partial
   - application services

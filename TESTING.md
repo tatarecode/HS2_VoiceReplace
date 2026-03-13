@@ -1,4 +1,4 @@
-﻿# Testing
+# Testing
 
 This repository includes automated tests for both the C# application code and the maintained Python helper scripts.
 
@@ -32,19 +32,19 @@ The current suite intentionally focuses on stable, dependency-light logic first.
 
 ## Minimal Build Verification
 
-### HS2VoiceReplace
+### HS2VoiceReplaceGui
 
 Verify that the GUI project can resolve `AssetsTools.NET.dll` and produce a build:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_assetstools.ps1
-dotnet build .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release
+dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release
 ```
 
 If `AssetsTools.NET.dll` is not available at the default path, specify it explicitly:
 
 ```powershell
-dotnet build .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
+dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
 ```
 
 ### UabAudioClipPatcher

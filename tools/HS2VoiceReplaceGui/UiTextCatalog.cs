@@ -13,7 +13,7 @@ internal static class UiTextCatalog
     private static readonly Dictionary<string, Entry> Entries = new(StringComparer.Ordinal)
     {
         // App and top-level commands
-        ["app.title"] = E("HS2 音声差し替え (C#)", "HS2 Voice Replace (C#)"),
+        ["app.title"] = E("HS2VoiceReplaceGui", "HS2VoiceReplaceGui"),
         ["button.setup"] = E("依存セットアップ", "Install Dependencies"),
         ["button.extract"] = E("データ抽出", "Extract Data"),
         ["button.deploy"] = E("配備", "Deploy"),

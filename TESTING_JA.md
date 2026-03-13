@@ -32,19 +32,19 @@
 
 ## 最小ビルド確認
 
-### HS2VoiceReplace
+### HS2VoiceReplaceGui
 
 `AssetsTools.NET.dll` を解決できて、GUI プロジェクトがビルドできることを確認します。
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_assetstools.ps1
-dotnet build .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release
+dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release
 ```
 
 既定パスに `AssetsTools.NET.dll` が無い場合は、明示的に指定してください。
 
 ```powershell
-dotnet build .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
+dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
 ```
 
 ### UabAudioClipPatcher

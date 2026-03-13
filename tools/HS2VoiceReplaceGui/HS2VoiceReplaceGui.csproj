@@ -5,6 +5,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>HS2VoiceReplaceGui</AssemblyName>
     <AssetsToolsNetPath Condition="'$(AssetsToolsNetPath)' == ''">..\..\_tools\uabea\v8\AssetsTools.NET.dll</AssetsToolsNetPath>
   </PropertyGroup>
   <ItemGroup>

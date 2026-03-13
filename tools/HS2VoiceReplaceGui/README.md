@@ -1,6 +1,6 @@
-﻿# HS2VoiceReplace GUI
+# HS2VoiceReplaceGui
 
-This directory contains the main WinForms application for HS2VoiceReplace.
+This directory contains the main WinForms GUI application for HS2VoiceReplace.
 
 The GUI coordinates the full voice-replacement workflow:
 
@@ -82,15 +82,15 @@ When `Skip completed steps` is enabled:
 ## Build
 
 ```powershell
-dotnet build .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release
-dotnet publish .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release -r win-x64 --self-contained false -o .\tools\HS2VoiceReplace\publish\win-x64
+dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release
+dotnet publish .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release -r win-x64 --self-contained false -o .\tools\HS2VoiceReplaceGui\publish\win-x64
 ```
 
 If `AssetsTools.NET.dll` is not present at the default path, build with:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_assetstools.ps1
-dotnet build .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
+dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
 ```
 
 ## Notes

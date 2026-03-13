@@ -1,6 +1,6 @@
-﻿# HS2VoiceReplace GUI
+# HS2VoiceReplaceGui
 
-このディレクトリには、HS2VoiceReplace のメイン WinForms アプリケーションが含まれています。
+このディレクトリには、HS2VoiceReplace のメイン WinForms GUI アプリケーションが含まれています。
 
 GUI は、音声差し替えの一連の処理を管理します。
 
@@ -84,15 +84,15 @@ GUI は、音声差し替えの一連の処理を管理します。
 ## ビルド
 
 ```powershell
-dotnet build .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release
-dotnet publish .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release -r win-x64 --self-contained false -o .\tools\HS2VoiceReplace\publish\win-x64
+dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release
+dotnet publish .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release -r win-x64 --self-contained false -o .\tools\HS2VoiceReplaceGui\publish\win-x64
 ```
 
 既定パスに `AssetsTools.NET.dll` が無い場合は、次のように指定してビルドしてください。
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_assetstools.ps1
-dotnet build .\tools\HS2VoiceReplace\HS2VoiceReplace.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
+dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
 ```
 
 ## 注意

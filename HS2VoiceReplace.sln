@@ -12,7 +12,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HS2VoiceReplace.Runtime", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HS2VoiceReplace.Tests", "tests\HS2VoiceReplace.Tests\HS2VoiceReplace.Tests.csproj", "{33F836BD-9A16-695E-59AB-B85258DD33F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HS2VoiceReplace", "tools\HS2VoiceReplace\HS2VoiceReplace.csproj", "{EFEEA529-AA4E-D874-C425-97B908A9FD68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HS2VoiceReplaceGui", "tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj", "{EFEEA529-AA4E-D874-C425-97B908A9FD68}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UabAudioClipPatcher", "tools\UabAudioClipPatcher\UabAudioClipPatcher.csproj", "{053202EA-3DC4-7C7B-4C91-7C197EB56266}"
 EndProject
