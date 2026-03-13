@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+**/publish/
+**/.test_artifacts/
+.dotnet_cli_home/
+_tools/uabea/v8/AssetsTools.NET.dll
+*.user
+*.suo

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssetsToolsNetPath Condition="'$(AssetsToolsNetPath)' == ''">..\..\_tools\uabea\v8\AssetsTools.NET.dll</AssetsToolsNetPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AssetsTools.NET">
+      <HintPath>$(AssetsToolsNetPath)</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

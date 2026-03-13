@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<manifest schema-ver="1">
+  <guid>com.hs2voicereplace.runtime</guid>
+  <name>HS2 Voice Replace Runtime Support</name>
+  <version>1.0.0</version>
+  <author>HS2VoiceReplace</author>
+  <description>Companion zipmod for replacing voice bundles of an existing personality ID without editing live game files.</description>
+</manifest>
+
+
