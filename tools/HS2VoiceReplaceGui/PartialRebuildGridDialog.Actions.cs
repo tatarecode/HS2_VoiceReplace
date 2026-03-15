@@ -83,15 +83,18 @@ internal sealed partial class PartialRebuildGridDialog
         try
         {
             row.Bucket = (row.Bucket ?? "").Trim().ToLowerInvariant() == "ero" ? "ero" : "normal";
+            var rebuiltRel = row.RelativePath;
             var outWav = await _onRebuild(row);
             row.ConvertedFile = outWav;
             row.SourceExists = File.Exists(row.SourceFile);
             row.ConvertedExists = File.Exists(row.ConvertedFile);
             row.SampleSignatureUsed = row.Bucket == "ero" ? row.SampleSignatureEro : row.SampleSignatureNormal;
             SaveSampleSignatureMapForRun(row.RunRoot);
-            row.Status = T("dialog.partialGrid.status.doneAt", DateTime.Now.ToString("HH:mm:ss", CultureInfo.InvariantCulture));
-            _lblStatus.Text = T("dialog.partialGrid.status.updatedPath", row.RelativePath);
-            _onLog($"grid rebuild done: {row.RelativePath}");
+            ReloadRows();
+            if (_rowByRel.TryGetValue(rebuiltRel, out var refreshedRow))
+                refreshedRow.Status = T("dialog.partialGrid.status.doneAt", DateTime.Now.ToString("HH:mm:ss", CultureInfo.InvariantCulture));
+            _lblStatus.Text = T("dialog.partialGrid.status.updatedPath", rebuiltRel);
+            _onLog($"grid rebuild done: {rebuiltRel}");
         }
         catch (Exception ex)
         {

@@ -64,5 +64,31 @@ public sealed class PartialRebuildGridDataUtilTests
         Assert.Equal("e1", row.Ero);
         Assert.Equal("n1", row.Used);
     }
+
+    [Fact]
+    public void ResolveDisplayedRowSampleSignatures_PrefersRunLevelWhenPerRowMapIsBlank()
+    {
+        var run = new PartialRebuildGridDataUtil.RunSampleSignatures("run-n", "run-e");
+        var map = new PartialRebuildGridDataUtil.RowSampleSignature("", "", "");
+
+        var resolved = PartialRebuildGridDataUtil.ResolveDisplayedRowSampleSignatures("normal", run, map);
+
+        Assert.Equal("run-n", resolved.Normal);
+        Assert.Equal("run-e", resolved.Ero);
+        Assert.Equal("run-n", resolved.Used);
+    }
+
+    [Fact]
+    public void ResolveDisplayedRowSampleSignatures_PreservesPreviousValuesWhenCurrentSourcesAreEmpty()
+    {
+        var run = new PartialRebuildGridDataUtil.RunSampleSignatures("", "");
+        var previous = new PartialRebuildGridDataUtil.RowSampleSignature("prev-n", "prev-e", "prev-used");
+
+        var resolved = PartialRebuildGridDataUtil.ResolveDisplayedRowSampleSignatures("ero", run, null, previous);
+
+        Assert.Equal("prev-n", resolved.Normal);
+        Assert.Equal("prev-e", resolved.Ero);
+        Assert.Equal("prev-e", resolved.Used);
+    }
 }
 

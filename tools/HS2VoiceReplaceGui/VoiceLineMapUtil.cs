@@ -58,6 +58,52 @@ internal static class VoiceLineMapUtil
         return map;
     }
 
+    public static List<string> EnumerateVoiceLineTextAssetFiles(string sourceRoot)
+    {
+        var files = new List<string>();
+        if (string.IsNullOrWhiteSpace(sourceRoot) || !Directory.Exists(sourceRoot))
+            return files;
+
+        try
+        {
+            foreach (var dir in Directory.EnumerateDirectories(sourceRoot, "list_h_sound_voice_*", SearchOption.AllDirectories))
+            {
+                try
+                {
+                    files.AddRange(Directory.EnumerateFiles(dir, "*.TextAsset", SearchOption.TopDirectoryOnly));
+                }
+                catch
+                {
+                }
+            }
+        }
+        catch
+        {
+        }
+
+        return files
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    public static Dictionary<string, string> BuildVoiceLineMapFromTextAssetFiles(IEnumerable<string> textAssetFiles)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var file in textAssetFiles)
+        {
+            if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
+                continue;
+
+            foreach (var kv in BuildVoiceLineMapFromTextAssetLines(File.ReadLines(file, Encoding.UTF8)))
+            {
+                if (!map.ContainsKey(kv.Key))
+                    map[kv.Key] = kv.Value;
+            }
+        }
+        return map;
+    }
+
     public static void SaveVoiceLineMapCsv(string path, IReadOnlyDictionary<string, string> map)
     {
         File.WriteAllLines(path, SerializeVoiceLineMapCsv(map), new UTF8Encoding(false));

@@ -206,6 +206,45 @@ internal static partial class VoiceReplacePipeline
             log($"  manifest: {extractManifest}");
             steps.MarkDone("03_manifest");
         }
+
+        var voiceLineMapPath = Path.Combine(paths.RunRoot, "voice_line_map.csv");
+        var existingTextAssetFiles = VoiceLineMapUtil.EnumerateVoiceLineTextAssetFiles(paths.RunRoot);
+        if (existingTextAssetFiles.Count == 0)
+        {
+            log("export voice text assets into run-root");
+            var exportedTextAssets = VoiceLineBundleExtractor.ExportVoiceLineTextAssets(
+                o.SourceHs2Root,
+                classDataPath,
+                paths.RunRoot);
+            if (exportedTextAssets > 0)
+                log($"  exported voice text assets={exportedTextAssets}");
+        }
+
+        log("build voice_line_map.csv from list/h/sound/voice + adv/scenario");
+        var textAssetFiles = VoiceLineMapUtil.EnumerateVoiceLineTextAssetFiles(paths.RunRoot);
+        var voiceLineMap = VoiceLineMapUtil.BuildVoiceLineMapFromTextAssetFiles(textAssetFiles);
+        var advVoiceLineMap = AdvScenarioVoiceLineExtractor.ExtractVoiceLineMap(
+            o.SourceHs2Root,
+            classDataPath,
+            pid);
+        var supplemented = 0;
+        foreach (var kv in advVoiceLineMap)
+        {
+            if (voiceLineMap.ContainsKey(kv.Key))
+                continue;
+            voiceLineMap[kv.Key] = kv.Value;
+            supplemented++;
+        }
+
+        if (voiceLineMap.Count > 0)
+        {
+            VoiceLineMapUtil.SaveVoiceLineMapCsv(voiceLineMapPath, voiceLineMap);
+            log($"  voice lines: files={textAssetFiles.Count}, rows={voiceLineMap.Count}, adv_supplemented={supplemented}");
+        }
+        else
+        {
+            log($"  [warn] voice lines were not found under {paths.RunRoot}");
+        }
     }
 }
 

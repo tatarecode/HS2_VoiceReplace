@@ -24,6 +24,7 @@ internal sealed partial class PartialRebuildGridDialog
             var sigMap = LoadSampleSignatureMap(runFull);
             var runSig = LoadRunLevelSampleSignatures(runFull);
             var voiceLineMap = LoadVoiceLineMap(runFull);
+            var previousRows = _rows.ToDictionary(x => x.RelativePath, x => x, StringComparer.OrdinalIgnoreCase);
 
             var outRoot = Path.Combine(runFull, "voice_replace_wav");
             var loaded = 0;
@@ -44,15 +45,17 @@ internal sealed partial class PartialRebuildGridDialog
                 if (bucket != "ero") bucket = "normal";
                 var src = cols[2];
                 var dst = Path.Combine(outRoot, rel.Replace('/', Path.DirectorySeparatorChar));
-                var sigN = runSig.Normal;
-                var sigE = runSig.Ero;
-                var sigUsed = bucket == "ero" ? sigE : sigN;
-                if (sigMap.TryGetValue(rel, out var sigEntry))
-                {
-                    sigN = sigEntry.Normal;
-                    sigE = sigEntry.Ero;
-                    sigUsed = sigEntry.Used;
-                }
+                previousRows.TryGetValue(rel, out var previousRow);
+                sigMap.TryGetValue(rel, out var sigEntry);
+                var resolvedSignatures = PartialRebuildGridDataUtil.ResolveDisplayedRowSampleSignatures(
+                    bucket,
+                    new PartialRebuildGridDataUtil.RunSampleSignatures(runSig.Normal, runSig.Ero),
+                    sigMap.ContainsKey(rel)
+                        ? new PartialRebuildGridDataUtil.RowSampleSignature(sigEntry.Normal, sigEntry.Ero, sigEntry.Used)
+                        : null,
+                    previousRow == null
+                        ? null
+                        : new PartialRebuildGridDataUtil.RowSampleSignature(previousRow.SampleSignatureNormal, previousRow.SampleSignatureEro, previousRow.SampleSignatureUsed));
 
                 var item = new PartialRebuildGridRow
                 {
@@ -64,16 +67,24 @@ internal sealed partial class PartialRebuildGridDialog
                     SourceExists = File.Exists(src),
                     ConvertedExists = File.Exists(dst),
                     Status = BuildDisplayStatus(statusMap.TryGetValue(rel, out var st) ? st : "", File.Exists(dst)),
-                    VoiceLine = voiceLineMap.TryGetValue(rel, out var lineText) ? lineText : "",
-                    SampleSignatureNormal = sigN,
-                    SampleSignatureEro = sigE,
-                    SampleSignatureUsed = sigUsed
+                    VoiceLine = PartialRebuildGridDataUtil.PreferNonEmpty(
+                        voiceLineMap.TryGetValue(rel, out var lineText) ? lineText : "",
+                        previousRow?.VoiceLine),
+                    SampleSignatureNormal = resolvedSignatures.Normal,
+                    SampleSignatureEro = resolvedSignatures.Ero,
+                    SampleSignatureUsed = resolvedSignatures.Used
                 };
                 _rows.Add(item);
                 _rowByRel[rel] = item;
                 _rowIndexByRel[rel] = _rows.Count - 1;
                 loaded++;
             }
+
+            var visibleVoiceLineMap = _rows
+                .Where(x => !string.IsNullOrWhiteSpace(x.VoiceLine))
+                .ToDictionary(x => x.RelativePath, x => x.VoiceLine, StringComparer.OrdinalIgnoreCase);
+            if (visibleVoiceLineMap.Count > 0 && visibleVoiceLineMap.Count != voiceLineMap.Count)
+                SaveVoiceLineMapCsv(runFull, visibleVoiceLineMap);
 
             _lblStatus.Text = T("dialog.partialGrid.status.loadedRows", loaded);
             _onLog($"grid reload: run_root={runFull}, rows={loaded}");

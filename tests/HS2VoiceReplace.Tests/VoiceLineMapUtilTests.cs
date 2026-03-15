@@ -58,5 +58,59 @@ public sealed class VoiceLineMapUtilTests
             tempRoot.Delete(true);
         }
     }
+
+    [Fact]
+    public void EnumerateVoiceLineTextAssetFiles_Finds_ListDirectories_Recursively()
+    {
+        var tempRoot = Directory.CreateTempSubdirectory("hs2vr_voiceline_scan_");
+        try
+        {
+            var dir = Path.Combine(tempRoot.FullName, "nested", "list_h_sound_voice_30");
+            Directory.CreateDirectory(dir);
+            var textAsset = Path.Combine(dir, "sample.TextAsset");
+            File.WriteAllText(textAsset, "line");
+            File.WriteAllText(Path.Combine(dir, "ignore.txt"), "x");
+
+            var files = VoiceLineMapUtil.EnumerateVoiceLineTextAssetFiles(tempRoot.FullName);
+
+            Assert.Single(files);
+            Assert.Equal(textAsset, files[0]);
+        }
+        finally
+        {
+            tempRoot.Delete(true);
+        }
+    }
+
+    [Fact]
+    public void BuildVoiceLineMapFromTextAssetFiles_Merges_FirstEntry_PerClip_AcrossFiles()
+    {
+        var tempRoot = Directory.CreateTempSubdirectory("hs2vr_voiceline_files_");
+        try
+        {
+            var dir = Path.Combine(tempRoot.FullName, "list_h_sound_voice_30");
+            Directory.CreateDirectory(dir);
+            var fileA = Path.Combine(dir, "a.TextAsset");
+            var fileB = Path.Combine(dir, "b.TextAsset");
+            File.WriteAllLines(fileA, new[]
+            {
+                "こんにちは\tunused\tabdata/sound/data/pcm/c02/adv/30.unity3d\thsa_02_000_00_00_00_00",
+            });
+            File.WriteAllLines(fileB, new[]
+            {
+                "上書きされない\tunused\tabdata/sound/data/pcm/c02/adv/30.unity3d\thsa_02_000_00_00_00_00",
+                "別セリフ\tunused\tabdata/sound/data/pcm/c02/h/50.unity3d\thsh_02_00_00_000_00_00",
+            });
+
+            var map = VoiceLineMapUtil.BuildVoiceLineMapFromTextAssetFiles(new[] { fileA, fileB });
+
+            Assert.Equal("こんにちは", map["adv/hsa_02_000_00_00_00_00.wav"]);
+            Assert.Equal("別セリフ", map["h/hsh_02_00_00_000_00_00.wav"]);
+        }
+        finally
+        {
+            tempRoot.Delete(true);
+        }
+    }
 }
 

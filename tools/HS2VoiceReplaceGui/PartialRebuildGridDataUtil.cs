@@ -8,6 +8,42 @@ internal static class PartialRebuildGridDataUtil
     internal readonly record struct RunSampleSignatures(string Normal, string Ero);
     internal readonly record struct RowSampleSignature(string Normal, string Ero, string Used);
 
+    public static string PreferNonEmpty(params string?[] values)
+    {
+        foreach (var value in values)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+                return value;
+        }
+        return "";
+    }
+
+    public static RowSampleSignature ResolveDisplayedRowSampleSignatures(
+        string bucket,
+        RunSampleSignatures runSignatures,
+        RowSampleSignature? mapSignatures,
+        RowSampleSignature? previousSignatures = null)
+    {
+        var normal = PreferNonEmpty(
+            mapSignatures?.Normal,
+            runSignatures.Normal,
+            previousSignatures?.Normal);
+
+        var ero = PreferNonEmpty(
+            mapSignatures?.Ero,
+            runSignatures.Ero,
+            previousSignatures?.Ero);
+
+        var bucketNormalized = string.Equals(bucket, "ero", StringComparison.OrdinalIgnoreCase) ? "ero" : "normal";
+        var fallbackUsed = bucketNormalized == "ero" ? ero : normal;
+        var used = PreferNonEmpty(
+            mapSignatures?.Used,
+            fallbackUsed,
+            previousSignatures?.Used);
+
+        return new RowSampleSignature(normal, ero, used);
+    }
+
     public static List<string> ParseCsvLine(string line)
     {
         var cols = new List<string>();
