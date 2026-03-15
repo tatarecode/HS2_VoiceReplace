@@ -13,13 +13,19 @@ internal sealed partial class PartialRebuildGridDialog
             {
                 _rows.Clear();
                 _lblStatus.Text = T("dialog.partialGrid.status.runRootRequired");
+                UpdateEmptyState(T("dialog.partialGrid.empty.extractFirst"), visible: true);
                 return;
             }
 
             var runFull = Path.GetFullPath(runRoot);
             var manifest = Path.Combine(runFull, "rvc_batches", "routing_manifest.csv");
             if (!File.Exists(manifest))
-                throw new FileNotFoundException(UiTextCatalog.Get(Language, "error.manifestNotFound", manifest));
+            {
+                _rows.Clear();
+                _lblStatus.Text = T("dialog.partialGrid.empty.extractFirst");
+                UpdateEmptyState(T("dialog.partialGrid.empty.extractFirst"), visible: true);
+                return;
+            }
             var statusMap = LoadStatusMap(runFull);
             var sigMap = LoadSampleSignatureMap(runFull);
             var runSig = LoadRunLevelSampleSignatures(runFull);
@@ -86,14 +92,27 @@ internal sealed partial class PartialRebuildGridDialog
             if (visibleVoiceLineMap.Count > 0 && visibleVoiceLineMap.Count != voiceLineMap.Count)
                 SaveVoiceLineMapCsv(runFull, visibleVoiceLineMap);
 
-            _lblStatus.Text = T("dialog.partialGrid.status.loadedRows", loaded);
+            _lblStatus.Text = loaded > 0
+                ? T("dialog.partialGrid.status.loadedRows", loaded)
+                : T("dialog.partialGrid.empty.noRows");
+            UpdateEmptyState(
+                loaded > 0 ? string.Empty : T("dialog.partialGrid.empty.noRows"),
+                visible: loaded == 0);
             _onLog($"grid reload: run_root={runFull}, rows={loaded}");
         }
         catch (Exception ex)
         {
             _rows.Clear();
             _lblStatus.Text = T("dialog.partialGrid.status.errorWithMessage", ex.Message);
+            UpdateEmptyState(T("dialog.partialGrid.empty.extractFirst"), visible: true);
         }
+    }
+
+    private void UpdateEmptyState(string message, bool visible)
+    {
+        _lblEmptyState.Text = message;
+        _lblEmptyState.Visible = visible;
+        _grid.Visible = !visible;
     }
 
     private Dictionary<string, string> LoadStatusMap(string runRoot)

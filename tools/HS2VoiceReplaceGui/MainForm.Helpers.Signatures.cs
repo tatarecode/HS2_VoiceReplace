@@ -7,6 +7,8 @@ public sealed partial class MainForm
 {
     private void EditSeedVcSettings()
     {
+        if (_isBusy)
+            return;
         using var dlg = new SeedVcSettingsDialog(_seedVc.Clone());
         if (dlg.ShowDialog(this) != DialogResult.OK)
             return;

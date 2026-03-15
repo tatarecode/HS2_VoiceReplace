@@ -52,17 +52,25 @@ public sealed partial class MainForm : Form
         Font = new Font("Consolas", 9F),
     };
     private readonly MenuStrip _menu = new() { Dock = DockStyle.Top };
+    private ToolStripMenuItem? _settingsMenuItem;
+    private ToolStripMenuItem? _menuBasicItem;
+    private ToolStripMenuItem? _menuSampleItem;
+    private ToolStripMenuItem? _menuConvertItem;
     private readonly Panel _headerHost = new() { Dock = DockStyle.Top, AutoScroll = true, Height = 170 };
     private readonly Panel _gridHost = new() { Dock = DockStyle.Fill };
     private PartialRebuildGridDialog? _embeddedGrid;
     private Form? _basicSettingsDialog;
     private Form? _sampleAudioDialog;
+    private Control? _sampleAudioAssignPanel;
+    private Control? _sampleAudioActionsPanel;
+    private DataGridView? _sampleAudioGrid;
 
     private CancellationTokenSource? _cts;
     private bool _isBusy;
     private readonly string _bundleRootFixed;
     private readonly string _defaultOutputRoot;
     private string _activeOutputRoot;
+    private bool _startupHs2RootPromptHandled;
     private string UiSettingsPath => Path.Combine(_activeOutputRoot, "ui_settings.json");
     private string SampleAssetsCatalogPath => Path.Combine(_activeOutputRoot, "sample_assets.json");
     private string SampleAssetsRoot => Path.Combine(_activeOutputRoot, "sample_assets");
@@ -136,7 +144,7 @@ public sealed partial class MainForm : Form
         _btnUndeploy.Click += async (_, _) => await RunUndeployAsync();
         _btnPreview.Click += async (_, _) => await RunPreviewAsync();
         _btnSeedVcSettings.Click += (_, _) => EditSeedVcSettings();
-        _btnCancel.Click += (_, _) => _cts?.Cancel();
+        _btnCancel.Click += (_, _) => RequestCancelCurrentOperation();
         _btnPlayPreviewNormal.Click += async (_, _) => await PlayPreviewAsync(_lastPreviewNormalPath, _btnPlayPreviewNormal);
         _btnPlayPreviewEro.Click += async (_, _) => await PlayPreviewAsync(_lastPreviewEroPath, _btnPlayPreviewEro);
         _btnEditNormalSegment.Click += (_, _) => OpenRangeEditor(isEro: false);
@@ -153,6 +161,7 @@ public sealed partial class MainForm : Form
         };
         SizeChanged += (_, _) => ReflowLayout();
         FormClosing += (_, _) => SaveUiSettings();
+        Shown += (_, _) => PromptForHs2RootIfMissingOnStartup();
     }
 }
 

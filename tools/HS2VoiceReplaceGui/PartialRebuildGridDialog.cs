@@ -16,7 +16,15 @@ internal sealed partial class PartialRebuildGridDialog : Form
     private readonly Button _btnReload = new() { Text = UiTextCatalog.Get("button.reload"), Width = 110, Height = 36 };
     private readonly Button _btnRunFull = new() { Text = UiTextCatalog.Get("button.runAll"), Width = 140, Height = 36 };
     private readonly Button _btnStopFull = new() { Text = UiTextCatalog.Get("button.stop"), Width = 110, Height = 36, Enabled = false };
+    private readonly Panel _gridPanel = new() { Dock = DockStyle.Fill };
     private readonly DataGridView _grid = new() { Dock = DockStyle.Fill, AllowUserToAddRows = false, AllowUserToDeleteRows = false, RowHeadersVisible = false };
+    private readonly Label _lblEmptyState = new()
+    {
+        Dock = DockStyle.Fill,
+        TextAlign = ContentAlignment.MiddleCenter,
+        AutoSize = false,
+        Visible = false,
+    };
     private readonly ProgressBar _pbFull = new() { Dock = DockStyle.Fill, Height = 20, Minimum = 0, Maximum = 100, Value = 0 };
     private readonly Label _lblStatus = new() { AutoSize = true };
     private readonly BindingList<PartialRebuildGridRow> _rows = new();
@@ -27,6 +35,7 @@ internal sealed partial class PartialRebuildGridDialog : Form
     private readonly Func<PartialRebuildGridRow, Task<string>> _onRebuild;
     private readonly Func<Action<string>, Task<string>> _onRunFull;
     private readonly Func<bool> _canRunFull;
+    private readonly Func<bool> _isOwnerBusy;
     private readonly Func<bool> _onCancelFull;
     private readonly bool _useEnglish;
     private bool _busy;

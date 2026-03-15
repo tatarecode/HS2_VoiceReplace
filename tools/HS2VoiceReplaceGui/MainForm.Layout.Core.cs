@@ -10,17 +10,17 @@ public sealed partial class MainForm
         Controls.Clear();
         _menu.Items.Clear();
         _headerHost.Controls.Clear();
-        var settingsMenu = new ToolStripMenuItem(T("menu.settings"));
-        var menuBasic = new ToolStripMenuItem(T("menu.general"));
-        var menuSample = new ToolStripMenuItem(T("menu.sampleAudio"));
-        var menuConvert = new ToolStripMenuItem(T("menu.conversion"));
-        menuBasic.Click += (_, _) => OpenBasicSettingsDialog();
-        menuSample.Click += (_, _) => OpenSampleAudioDialog();
-        menuConvert.Click += (_, _) => EditSeedVcSettings();
-        settingsMenu.DropDownItems.Add(menuBasic);
-        settingsMenu.DropDownItems.Add(menuSample);
-        settingsMenu.DropDownItems.Add(menuConvert);
-        _menu.Items.Add(settingsMenu);
+        _settingsMenuItem = new ToolStripMenuItem(T("menu.settings"));
+        _menuBasicItem = new ToolStripMenuItem(T("menu.general"));
+        _menuSampleItem = new ToolStripMenuItem(T("menu.sampleAudio"));
+        _menuConvertItem = new ToolStripMenuItem(T("menu.conversion"));
+        _menuBasicItem.Click += (_, _) => OpenBasicSettingsDialog();
+        _menuSampleItem.Click += (_, _) => OpenSampleAudioDialog();
+        _menuConvertItem.Click += (_, _) => EditSeedVcSettings();
+        _settingsMenuItem.DropDownItems.Add(_menuBasicItem);
+        _settingsMenuItem.DropDownItems.Add(_menuSampleItem);
+        _settingsMenuItem.DropDownItems.Add(_menuConvertItem);
+        _menu.Items.Add(_settingsMenuItem);
 
         var header = new TableLayoutPanel
         {

@@ -6,6 +6,8 @@ public sealed partial class MainForm
 {
     private void HandleSampleRoleChanged(ComboBox comboBox, bool isEro)
     {
+        if (_isBusy)
+            return;
         if (comboBox.SelectedItem is not ComboBoxItem item)
             return;
 
@@ -23,6 +25,8 @@ public sealed partial class MainForm
 
     private async Task HandleSampleAssetAddAsync(Button triggerButton, Action refresh)
     {
+        if (_isBusy)
+            return;
         try
         {
             using var ofd = new OpenFileDialog { Filter = "Audio Files|*.wav;*.mp3;*.flac;*.ogg;*.m4a;*.aac|All Files|*.*" };
@@ -59,6 +63,8 @@ public sealed partial class MainForm
 
     private void HandleSampleAssetRename(string? id, Action refresh)
     {
+        if (_isBusy)
+            return;
         try
         {
             var item = _sampleAssets.FirstOrDefault(x => string.Equals(x.Id, id, StringComparison.OrdinalIgnoreCase));
@@ -80,6 +86,8 @@ public sealed partial class MainForm
 
     private void HandleSampleAssetTrash(string? id, Action refresh)
     {
+        if (_isBusy)
+            return;
         try
         {
             var item = _sampleAssets.FirstOrDefault(x => string.Equals(x.Id, id, StringComparison.OrdinalIgnoreCase));
@@ -112,6 +120,8 @@ public sealed partial class MainForm
 
     private void HandleSampleAssetRestore(string? id, Action refresh)
     {
+        if (_isBusy)
+            return;
         try
         {
             var item = _sampleAssets.FirstOrDefault(x => string.Equals(x.Id, id, StringComparison.OrdinalIgnoreCase));
@@ -142,6 +152,8 @@ public sealed partial class MainForm
 
     private void HandleSampleAssetDeletePermanent(string? id, Action refresh)
     {
+        if (_isBusy)
+            return;
         try
         {
             var item = _sampleAssets.FirstOrDefault(x => string.Equals(x.Id, id, StringComparison.OrdinalIgnoreCase));

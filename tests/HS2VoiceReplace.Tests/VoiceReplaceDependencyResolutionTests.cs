@@ -21,7 +21,7 @@ public sealed class VoiceReplaceDependencyResolutionTests
             new[]
             {
                 Path.Combine("mods_template", "HS2VoiceReplaceRuntime"),
-                Path.Combine("mods_src", "HS2VoiceReplaceRuntime"),
+                Path.Combine("mods_src", "HS2VoiceReplaceRuntimeTemplate"),
             },
             actual);
     }

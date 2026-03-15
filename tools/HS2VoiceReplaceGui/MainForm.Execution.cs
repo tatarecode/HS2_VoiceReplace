@@ -116,6 +116,30 @@ public sealed partial class MainForm
         }
     }
 
+    private async Task<string> RunRowRebuildAsync(PartialRebuildGridRow row)
+    {
+        SetBusyState(isBusy: true);
+        _cts = new CancellationTokenSource();
+
+        try
+        {
+            var options = BuildOptions();
+            return await _appService.RebuildRelativeInFullRunAsync(
+                options,
+                row.RunRoot,
+                row.RelativePath,
+                row.Bucket,
+                AppendLog,
+                _cts.Token);
+        }
+        finally
+        {
+            SetBusyState(isBusy: false);
+            _cts?.Dispose();
+            _cts = null;
+        }
+    }
+
     private async Task<string> RunPipelineAsync(Action<string>? onProgressLine = null, string? runRootOverride = null)
     {
         SetBusyState(isBusy: true);
@@ -227,22 +251,48 @@ public sealed partial class MainForm
     private void SetBusyState(bool isBusy)
     {
         _isBusy = isBusy;
-        _btnSeedVcSettings.Enabled = true;
-        if (_btnSampleDialogCancel != null && !_btnSampleDialogCancel.IsDisposed)
-            _btnSampleDialogCancel.Enabled = isBusy;
-        _btnEditNormalSegment.Enabled = true;
-        _btnEditEroSegment.Enabled = true;
-        _btnClearNormalSegment.Enabled = true;
-        _btnClearEroSegment.Enabled = true;
+        UpdateBusySensitiveUi();
         RefreshActionAvailability();
+    }
+
+    private void UpdateBusySensitiveUi()
+    {
+        var canEditSettings = !_isBusy;
+        _menu.Enabled = canEditSettings;
+        if (_settingsMenuItem != null)
+            _settingsMenuItem.Enabled = canEditSettings;
+        if (_menuBasicItem != null)
+            _menuBasicItem.Enabled = canEditSettings;
+        if (_menuSampleItem != null)
+            _menuSampleItem.Enabled = canEditSettings;
+        if (_menuConvertItem != null)
+            _menuConvertItem.Enabled = canEditSettings;
+        _cmbPersonality.Enabled = canEditSettings;
+        _btnSeedVcSettings.Enabled = canEditSettings;
+        _btnEditNormalSegment.Enabled = canEditSettings;
+        _btnEditEroSegment.Enabled = canEditSettings;
+        _btnClearNormalSegment.Enabled = canEditSettings;
+        _btnClearEroSegment.Enabled = canEditSettings;
+        if (_basicSettingsDialog is { IsDisposed: false })
+            _basicSettingsDialog.Enabled = canEditSettings;
+        if (_sampleAudioAssignPanel is { IsDisposed: false })
+            _sampleAudioAssignPanel.Enabled = canEditSettings;
+        if (_sampleAudioActionsPanel is { IsDisposed: false })
+            _sampleAudioActionsPanel.Enabled = canEditSettings;
+        if (_sampleAudioGrid is { IsDisposed: false })
+            _sampleAudioGrid.Enabled = canEditSettings;
+        if (_btnSampleDialogCancel != null && !_btnSampleDialogCancel.IsDisposed)
+            _btnSampleDialogCancel.Enabled = _isBusy;
     }
 
     private PipelineOptions BuildOptions(string? runRootOverride = null, bool deployToBackup = false)
     {
         ApplyOutputRootChangeFromUi(reloadSampleAssets: false);
         string ResolveUserPath(string p) => Path.GetFullPath(Environment.ExpandEnvironmentVariables(p));
+        string ResolveOptionalUserPath(string p) => string.IsNullOrWhiteSpace(p) ? string.Empty : ResolveUserPath(p);
         EnsureSelectedSampleAssets();
         SyncSelectedSampleAssetsToTextFields();
+        var hs2Root = GetConfiguredHs2Root();
         var normalAsset = GetSampleAssetById(_normalSampleAssetId);
         var eroAsset = GetSampleAssetById(_eroSampleAssetId) ?? normalAsset;
         var normalPathRaw = normalAsset != null ? GetAssetAbsolutePath(normalAsset) : _txtNormalSample.Text.Trim();
@@ -258,8 +308,8 @@ public sealed partial class MainForm
             BundleRoot = _bundleRootFixed,
             ExternalToolsRoot = string.IsNullOrWhiteSpace(_txtExternalToolsRoot.Text) ? "" : ResolveUserPath(_txtExternalToolsRoot.Text.Trim()),
             OutputBaseRoot = _activeOutputRoot,
-            SourceHs2Root = Path.GetFullPath(_txtSourceHs2Root.Text.Trim()),
-            DeployHs2Root = Path.GetFullPath(_txtDeployRoot.Text.Trim()),
+            SourceHs2Root = ResolveOptionalUserPath(hs2Root),
+            DeployHs2Root = ResolveOptionalUserPath(hs2Root),
             TargetPersonalityId = GetSelectedPersonalityId(),
             StyleNormalSample = normal,
             StyleEroSample = ero,
@@ -341,22 +391,22 @@ public sealed partial class MainForm
     }
 
     private bool CanPreview()
-        => Directory.Exists(_txtSourceHs2Root.Text.Trim()) && HasAssignedSampleAudio();
+        => Directory.Exists(GetConfiguredHs2Root()) && HasAssignedSampleAudio();
 
     private bool CanRunAll()
         => HasExtractedDataForCurrentPersonality() && HasAssignedSampleAudio();
 
     private bool CanDeploy()
-        => Directory.Exists(_txtDeployRoot.Text.Trim()) && HasDeployArtifactsForCurrentPersonality();
+        => Directory.Exists(GetConfiguredHs2Root()) && HasDeployArtifactsForCurrentPersonality();
 
     private bool CanUndeploy()
-        => Directory.Exists(_txtDeployRoot.Text.Trim()) && _appService.HasInstalledDeployArtifacts(_txtDeployRoot.Text.Trim(), GetSelectedPersonalityId());
+        => Directory.Exists(GetConfiguredHs2Root()) && _appService.HasInstalledDeployArtifacts(GetConfiguredHs2Root(), GetSelectedPersonalityId());
 
     private void RefreshActionAvailability()
     {
         var isBusy = _isBusy;
         _btnSetup.Enabled = !isBusy;
-        _btnExtract.Enabled = !isBusy && Directory.Exists(_txtSourceHs2Root.Text.Trim());
+        _btnExtract.Enabled = !isBusy && Directory.Exists(GetConfiguredHs2Root());
         _btnPreview.Enabled = !isBusy && CanPreview();
         _btnDeploy.Enabled = !isBusy && CanDeploy();
         _btnUndeploy.Enabled = !isBusy && CanUndeploy();

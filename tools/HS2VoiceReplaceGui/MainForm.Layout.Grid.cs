@@ -17,18 +17,7 @@ public sealed partial class MainForm
             _embeddedGrid = new PartialRebuildGridDialog(
                 suggested,
                 AppendLog,
-                async row =>
-                {
-                    var options = BuildOptions();
-                    var outWav = await _appService.RebuildRelativeInFullRunAsync(
-                        options,
-                        row.RunRoot,
-                        row.RelativePath,
-                        row.Bucket,
-                        AppendLog,
-                        CancellationToken.None);
-                    return outWav;
-                },
+                RunRowRebuildAsync,
                 async progress =>
                 {
                     var runRoot = await RunPipelineAsync(progress, GetCurrentRunRoot());
@@ -36,6 +25,7 @@ public sealed partial class MainForm
                     return runRoot;
                 },
                 CanRunAll,
+                () => _isBusy,
                 RequestCancelCurrentOperation,
                 showCloseButton: false,
                 useEnglish: _uiLanguage == UiLanguage.En)
@@ -108,8 +98,7 @@ public sealed partial class MainForm
         var defaultExternalRoot = Path.Combine(_activeOutputRoot, "external_tools");
         _txtExternalToolsRoot.Text = Environment.GetEnvironmentVariable("HS2VR_TOOLS_ROOT") ?? defaultExternalRoot;
         _txtOutputRoot.Text = _activeOutputRoot;
-        _txtSourceHs2Root.Text = string.Empty;
-        _txtDeployRoot.Text = string.Empty;
+        SetConfiguredHs2Root(string.Empty);
         ApplyV1NaturalPreset(_seedVc);
         _lblSeedVcSummary.Text = _seedVc.ToSummaryString();
         _cmbPersonality.Items.Clear();

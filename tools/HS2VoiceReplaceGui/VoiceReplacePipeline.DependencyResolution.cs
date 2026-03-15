@@ -104,7 +104,7 @@ private static string GetSeedVcInferScriptName(SeedVcUiSettings seed)
             string.Equals(parts[0], "mods_template", StringComparison.OrdinalIgnoreCase) &&
             string.Equals(parts[1], "HS2VoiceReplaceRuntime", StringComparison.OrdinalIgnoreCase))
         {
-            list.Add(Path.Combine("mods_src", parts[1]));
+            list.Add(Path.Combine("mods_src", "HS2VoiceReplaceRuntimeTemplate"));
         }
         return list;
     }

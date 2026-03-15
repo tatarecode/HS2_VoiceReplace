@@ -10,6 +10,7 @@ internal sealed partial class PartialRebuildGridDialog
         Func<PartialRebuildGridRow, Task<string>> onRebuild,
         Func<Action<string>, Task<string>> onRunFull,
         Func<bool> canRunFull,
+        Func<bool> isOwnerBusy,
         Func<bool> onCancelFull,
         bool showCloseButton = true,
         bool useEnglish = false)
@@ -18,6 +19,7 @@ internal sealed partial class PartialRebuildGridDialog
         _onRebuild = onRebuild;
         _onRunFull = onRunFull;
         _canRunFull = canRunFull;
+        _isOwnerBusy = isOwnerBusy;
         _onCancelFull = onCancelFull;
         _useEnglish = useEnglish;
 
@@ -61,7 +63,10 @@ internal sealed partial class PartialRebuildGridDialog
         root.Controls.Add(head, 0, 0);
 
         SetupGrid();
-        root.Controls.Add(_grid, 0, 1);
+        _lblEmptyState.Text = T("dialog.partialGrid.empty.extractFirst");
+        _gridPanel.Controls.Add(_grid);
+        _gridPanel.Controls.Add(_lblEmptyState);
+        root.Controls.Add(_gridPanel, 0, 1);
         root.Controls.Add(_pbFull, 0, 2);
         root.Controls.Add(_lblStatus, 0, 3);
 
@@ -208,9 +213,10 @@ internal sealed partial class PartialRebuildGridDialog
 
     private void SetBusyControls()
     {
-        _grid.Enabled = true;
-        _btnReload.Enabled = !_busy;
-        _btnRunFull.Enabled = !_busy && _canRunFull();
+        var ownerBusy = _isOwnerBusy();
+        _grid.Enabled = !ownerBusy && !_busy;
+        _btnReload.Enabled = !ownerBusy && !_busy;
+        _btnRunFull.Enabled = !ownerBusy && !_busy && _canRunFull();
         _btnStopFull.Enabled = _busy && _fullRunExecuting;
     }
 

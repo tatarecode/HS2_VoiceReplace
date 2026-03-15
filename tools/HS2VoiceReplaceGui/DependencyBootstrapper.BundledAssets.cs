@@ -99,7 +99,7 @@ internal static partial class DependencyBootstrapper
             var candidates = new[]
             {
                 Path.Combine(root, "mods_template", "HS2VoiceReplaceRuntime"),
-                Path.Combine(root, "mods_src", "HS2VoiceReplaceRuntime"),
+                Path.Combine(root, "mods_src", "HS2VoiceReplaceRuntimeTemplate"),
             };
             foreach (var c in candidates)
             {

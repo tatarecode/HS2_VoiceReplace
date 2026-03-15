@@ -142,7 +142,7 @@ public sealed partial class MainForm
         previewAction.Controls.Add(_btnPreview);
         _btnSampleDialogCancel = new Button { Text = T("button.stop"), Width = 120, Height = 36, Enabled = _isBusy };
         UiSizeHelper.FitButton(_btnSampleDialogCancel, 90, 36);
-        _btnSampleDialogCancel.Click += (_, _) => _cts?.Cancel();
+        _btnSampleDialogCancel.Click += (_, _) => RequestCancelCurrentOperation();
         previewAction.Controls.Add(_btnSampleDialogCancel);
         previewAction.Controls.Add(new Label
         {

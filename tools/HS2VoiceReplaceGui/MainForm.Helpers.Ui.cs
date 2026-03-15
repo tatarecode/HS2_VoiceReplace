@@ -60,6 +60,8 @@ public sealed partial class MainForm
 
     private void OpenRangeEditor(bool isEro)
     {
+        if (_isBusy)
+            return;
         try
         {
             var source = (isEro ? _txtEroSample.Text : _txtNormalSample.Text).Trim();
@@ -97,6 +99,8 @@ public sealed partial class MainForm
 
     private void ClearManualRange(bool isEro)
     {
+        if (_isBusy)
+            return;
         if (isEro)
         {
             _manualEroSegment = null;
@@ -216,6 +220,41 @@ public sealed partial class MainForm
         action.Controls.Add(clearButton);
         panel.Controls.Add(action, 1, row);
         row++;
+    }
+
+    private string GetConfiguredHs2Root()
+    {
+        var source = _txtSourceHs2Root.Text.Trim();
+        if (!string.IsNullOrWhiteSpace(source))
+            return source;
+        return _txtDeployRoot.Text.Trim();
+    }
+
+    private void SetConfiguredHs2Root(string? path)
+    {
+        var normalized = string.IsNullOrWhiteSpace(path) ? string.Empty : path.Trim();
+        _txtSourceHs2Root.Text = normalized;
+        _txtDeployRoot.Text = normalized;
+    }
+
+    private void PromptForHs2RootIfMissingOnStartup()
+    {
+        if (_startupHs2RootPromptHandled)
+            return;
+        _startupHs2RootPromptHandled = true;
+        if (!string.IsNullOrWhiteSpace(GetConfiguredHs2Root()))
+            return;
+
+        using var dlg = new FolderBrowserDialog
+        {
+            Description = T("dialog.hS2Root.pickOnStartup"),
+            UseDescriptionForTitle = true
+        };
+        if (dlg.ShowDialog(this) != DialogResult.OK || string.IsNullOrWhiteSpace(dlg.SelectedPath))
+            return;
+
+        SetConfiguredHs2Root(dlg.SelectedPath);
+        SaveUiSettings();
     }
 }
 

@@ -14,6 +14,7 @@ internal sealed class BootstrapUiSettings
 
 internal sealed class PersistedUiSettings
 {
+    public string? Hs2Root { get; set; }
     public string? ExternalToolsRoot { get; set; }
     public string? SourceHs2Root { get; set; }
     public string? DeployHs2Root { get; set; }

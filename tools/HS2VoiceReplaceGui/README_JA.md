@@ -63,7 +63,7 @@ GUI は、音声差し替えの一連の処理を管理します。
 - `tools/seed_vc_v2_inprocess_batch.py`
 - `tools/select_voice_style_segment.py`
 - `tools/UabAudioClipPatcher/*`
-- `mods_src/HS2VoiceReplaceRuntime/*`
+- `mods_src/HS2VoiceReplaceRuntimeTemplate/*`
 - `runtime/HS2VoiceReplace.Runtime/*`
 
 依存セットアップ時やローカル開発時には、これらを必要に応じて選択した外部ツールルートへコピーまたはビルドします。

@@ -12,8 +12,7 @@ public sealed partial class MainForm
         if (_sampleAudioDialog is { IsDisposed: false })
         {
             RefreshSampleSignatureDisplay();
-            if (_btnSampleDialogCancel != null && !_btnSampleDialogCancel.IsDisposed)
-                _btnSampleDialogCancel.Enabled = _isBusy;
+            UpdateBusySensitiveUi();
             _sampleAudioDialog.Show(this);
             _sampleAudioDialog.BringToFront();
             return;
@@ -21,6 +20,7 @@ public sealed partial class MainForm
 
         var dlg = CreateSampleAudioDialogShell(out var root);
         var assign = CreateSampleAudioAssignPanel(out var cmbNormal, out var cmbEro);
+        _sampleAudioAssignPanel = assign;
         root.Controls.Add(assign, 0, 0);
 
         var actions = CreateSampleAudioActionsPanel(
@@ -31,9 +31,11 @@ public sealed partial class MainForm
             out var btnDeleteHard,
             out var btnPlayAsset,
             out var chkShowTrash);
+        _sampleAudioActionsPanel = actions;
         root.Controls.Add(actions, 0, 1);
 
         var grid = CreateSampleAudioGrid();
+        _sampleAudioGrid = grid;
         root.Controls.Add(grid, 0, 2);
 
         var bottom = CreateSampleAudioBottomPanel(dlg, out var btnClose);
@@ -127,6 +129,7 @@ public sealed partial class MainForm
         btnPlayAsset.Click += async (_, _) => await HandleSampleAssetPlayAsync(SelectedRowId(), btnPlayAsset);
 
         RefreshAssetGrid();
+        UpdateBusySensitiveUi();
 
         dlg.FormClosing += (s, e) =>
         {
@@ -142,6 +145,9 @@ public sealed partial class MainForm
         {
             _lblSampleSignatureInDialog = null;
             _btnSampleDialogCancel = null;
+            _sampleAudioAssignPanel = null;
+            _sampleAudioActionsPanel = null;
+            _sampleAudioGrid = null;
             if (ReferenceEquals(_sampleAudioDialog, dlg))
                 _sampleAudioDialog = null;
         };

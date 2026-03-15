@@ -9,7 +9,7 @@ internal sealed partial class PartialRebuildGridDialog
 {
     private async Task RunFullAsync()
     {
-        if (_busy)
+        if (_busy || _isOwnerBusy())
             return;
         _busy = true;
         _fullRunExecuting = true;
@@ -54,6 +54,8 @@ internal sealed partial class PartialRebuildGridDialog
 
         var row = _rows[e.RowIndex];
         var colName = _grid.Columns[e.ColumnIndex].Name;
+        if (_isOwnerBusy())
+            return;
         if (colName == "btnPlaySrc")
         {
             PlayWav(row.SourceFile, T("dialog.sampleAudio.column.source"));
@@ -95,6 +97,12 @@ internal sealed partial class PartialRebuildGridDialog
                 refreshedRow.Status = T("dialog.partialGrid.status.doneAt", DateTime.Now.ToString("HH:mm:ss", CultureInfo.InvariantCulture));
             _lblStatus.Text = T("dialog.partialGrid.status.updatedPath", rebuiltRel);
             _onLog($"grid rebuild done: {rebuiltRel}");
+        }
+        catch (OperationCanceledException)
+        {
+            row.Status = T("dialog.partialGrid.status.cancelRequested");
+            _lblStatus.Text = T("dialog.partialGrid.status.cancelRequested");
+            _onLog("grid rebuild cancelled");
         }
         catch (Exception ex)
         {

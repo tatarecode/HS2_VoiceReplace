@@ -63,7 +63,7 @@ The repository provides the following source-side assets:
 - `tools/seed_vc_v2_inprocess_batch.py`
 - `tools/select_voice_style_segment.py`
 - `tools/UabAudioClipPatcher/*`
-- `mods_src/HS2VoiceReplaceRuntime/*`
+- `mods_src/HS2VoiceReplaceRuntimeTemplate/*`
 - `runtime/HS2VoiceReplace.Runtime/*`
 
 During dependency setup or local development, the application can copy or build the required files into the selected external tools root.

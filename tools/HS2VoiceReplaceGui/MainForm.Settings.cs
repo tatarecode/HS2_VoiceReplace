@@ -23,8 +23,13 @@ public sealed partial class MainForm
                 ChangeUiLanguage(loadedLang);
 
             if (!string.IsNullOrWhiteSpace(s.ExternalToolsRoot)) _txtExternalToolsRoot.Text = s.ExternalToolsRoot!;
-            if (!string.IsNullOrWhiteSpace(s.SourceHs2Root)) _txtSourceHs2Root.Text = s.SourceHs2Root!;
-            if (!string.IsNullOrWhiteSpace(s.DeployHs2Root)) _txtDeployRoot.Text = s.DeployHs2Root!;
+            var hs2Root = !string.IsNullOrWhiteSpace(s.Hs2Root)
+                ? s.Hs2Root
+                : !string.IsNullOrWhiteSpace(s.SourceHs2Root)
+                    ? s.SourceHs2Root
+                    : s.DeployHs2Root;
+            if (!string.IsNullOrWhiteSpace(hs2Root))
+                SetConfiguredHs2Root(hs2Root);
             if (!string.IsNullOrWhiteSpace(s.NormalSample)) _txtNormalSample.Text = s.NormalSample!;
             if (!string.IsNullOrWhiteSpace(s.EroSample)) _txtEroSample.Text = s.EroSample!;
             if (!string.IsNullOrWhiteSpace(s.NormalSampleAssetId)) _normalSampleAssetId = s.NormalSampleAssetId!;
@@ -76,9 +81,10 @@ public sealed partial class MainForm
                 _lastGridRunRoot = _embeddedGrid.RunRoot;
             var s = new PersistedUiSettings
             {
+                Hs2Root = GetConfiguredHs2Root(),
                 ExternalToolsRoot = _txtExternalToolsRoot.Text.Trim(),
-                SourceHs2Root = _txtSourceHs2Root.Text.Trim(),
-                DeployHs2Root = _txtDeployRoot.Text.Trim(),
+                SourceHs2Root = GetConfiguredHs2Root(),
+                DeployHs2Root = GetConfiguredHs2Root(),
                 TargetPersonalityId = GetSelectedPersonalityId(),
                 NormalSample = _txtNormalSample.Text.Trim(),
                 EroSample = _txtEroSample.Text.Trim(),
