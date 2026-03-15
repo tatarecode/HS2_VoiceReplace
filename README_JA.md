@@ -1,128 +1,84 @@
-﻿# HS2VoiceReplace
+# HS2VoiceReplace
 
-HS2VoiceReplace は、Honey Select 2 の音声差し替えを行うための C# GUI ツールです。
-実ゲーム環境を直接書き換えずに、音声差し替え用の生成・配備を行うことを目的としています。
+HS2VoiceReplace は、Honey Select 2 の音声差し替え package を生成して配備するための Windows GUI ツールです。
 
-この export フォルダには、別リポジトリとして継続開発できる最小限のソース一式が含まれています。
+このツールは、既存の HS2 環境から元のボイスデータを取り出し、寄せたい声のお手本音声を使って Seed-VC で変換し、ゲームで使える差し替えデータとして組み直して配備するためのものです。
 
-## リポジトリ構成
+- `HS2VoiceReplaceGui.exe`
+  - ワークフロー全体を制御するメイン GUI
+- 生成された `HS2_VoiceReplace.dll`
+  - 配備物が使用する動作用 DLL
+- 生成された `HS2VoiceReplace_cXX_*.zipmod`
+  - GUI が性格ごとに出力する zipmod
 
-- `tools/HS2VoiceReplaceGui`
-  - メインの WinForms GUI アプリケーション (`HS2VoiceReplaceGui.exe`)
-- `runtime/HS2VoiceReplace.Runtime`
-  - 配備物で使用する runtime plugin プロジェクト
-- `tools/UabAudioClipPatcher`
-  - bundle 再構築時に使用する AudioClip patcher
-- `tools/*.py`
-  - style 選択や Seed-VC 一括変換で使用する Python スクリプト
-- `mods_src/HS2VoiceReplaceRuntime`
-  - zipmod 生成に使う最小テンプレート
-- `tests/HS2VoiceReplace.Tests`
-  - C# 自動テスト
-- `tests/python`
-  - Python 自動テスト
+対象は `クール` や `ヤンデレ` のような既存性格です。
+このツールは新しい性格枠を追加するのではなく、既存性格に対する差し替え用 asset を作る前提です。
 
-## この export に含まれるもの
+生成物は、元のゲームデータを直接書き換えるのではなく、`mods` と `BepInEx\plugins` を使って追加配置する形を前提にしています。
+GUI からは性格単位で配備と配備解除を行えます。
 
-- アプリケーションのソースコード
-- runtime plugin のソースコード
-- 必要な補助スクリプト
-- テストコード
-- 最小限の packaging template
+## 前提環境
 
-## この export に含まれないもの
+- `HS2VoiceReplaceGui.exe` を実行できる Windows 環境
+- `.NET 8 Desktop Runtime`
+- 元音声を読み出すための Honey Select 2 環境
+- `mods` と `BepInEx\plugins` を使う配備先 HS2 環境
+- 寄せたい声のお手本音声
 
-- ローカルのビルド成果物
-- ローカルの publish 出力
-- マシン固有の仮想環境
-- 元ワークスペース内の無関係な旧ツール群
+変換側の依存物は、GUI のワークフロー内でセットアップできるものがあります。
 
-## ビルド前提
+## クイックスタート
 
-### GUI アプリケーション
+1. `HS2VoiceReplaceGui.exe` を起動する
+2. 元になる HS2 フォルダと対象性格を選ぶ
+3. お手本音声を用意し、必要なら依存セットアップを行う
+4. 抽出、試聴、全量変換を進める
+5. GUI から配備するか、生成物を手動配置する
+   - `HS2_VoiceReplace.dll` を `BepInEx\plugins` に置く
+   - `HS2VoiceReplace_cXX_*.zipmod` を `mods` に置く
 
-- .NET 8 SDK
-- 別途用意した `AssetsTools.NET.dll`
-  - このリポジトリには `AssetsTools.NET.dll` を同梱していません
-  - source build の既定配置先:
-    - `.\_tools\uabea\v8\AssetsTools.NET.dll`
-  - 任意の補助スクリプト:
-    - `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_assetstools.ps1`
-  - コマンドライン ビルドでは次も利用できます:
-    - `-p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll`
-- 保守対象の Python スクリプトと Python テスト向けの repo-local Python
-  - 既定パス:
-    - `.\_tools\python310\python.exe`
-  - 任意の補助スクリプト:
-    - `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1`
-- GUI が生成する作業データは、可能な場合はリポジトリ内ローカル フォルダを既定で使用します
-  - リポジトリ checkout 時の既定パス:
-    - `.\.hs2voicereplace\`
-  - 出力ルートは GUI の基本設定ダイアログから変更できます
+## Seed-VC 設定
 
-### Runtime plugin
+- `v1`
+  - 元のしゃべり方に寄りやすいです
+  - 既存ボイス差し替えなら、まずこれで十分です
+- `v2`
+  - 変化を強めに出したいとき向きです
+  - お手本の声にもっと寄せたいときに使います
 
-- .NET Framework 4.7.2 Targeting Pack
-- 以下の game-side 参照
-  - `BepInEx.dll`
-  - `0Harmony.dll`
-  - `UnityEngine.dll`
-  - `UnityEngine.CoreModule.dll`
-  - `UnityEngine.UI.dll`
+よく触る項目:
 
-runtime plugin プロジェクトは、これらの game-side DLL を同梱しません。
-
-## ビルド
-
-```powershell
-dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release
-dotnet build .\tools\UabAudioClipPatcher\UabAudioClipPatcher.csproj -c Release
-```
-
-既定パスに `AssetsTools.NET.dll` が無い場合は、明示的に指定してください。
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_assetstools.ps1
-dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
-dotnet build .\tools\UabAudioClipPatcher\UabAudioClipPatcher.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
-```
-
-## テスト
-
-C# と Python のテストをまとめて実行する場合:
-
-```powershell
-.\tools\run_tests.cmd
-```
-
-または:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\run_tests.ps1
-```
-
-マシン全体の Python に依存せず、repo 内専用の Python を用意したい場合:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1
-```
-
-## 開発の入口
-
-- GUI アプリケーション:
-  - `tools/HS2VoiceReplaceGui/MainForm.cs`
-- パイプライン制御:
-  - `tools/HS2VoiceReplaceGui/VoiceReplacePipeline.cs`
-- アプリケーションサービス層:
-  - `tools/HS2VoiceReplaceGui/ApplicationServices.cs`
-- UI 文言管理:
-  - `tools/HS2VoiceReplaceGui/UiTextCatalog.cs`
+- `DiffusionSteps`
+  - 高いほど重いけどきれいめ、低いほど速めです
+- `LengthAdjust`
+  - セリフの長さ感を調整します
+- `IntelligibilityCfgRate`
+  - 発音の分かりやすさ寄りにします
+- `SimilarityCfgRate`
+  - お手本の声らしさを強めます
+- `Temperature` / `TopP`
+  - 安定寄りにするか、変化を出すかの傾向です
 
 ## 補足
 
-- 開発導線の補足は `DEVELOPMENT.md` と `DEVELOPMENT_JA.md` にあります。
-- テスト実行の補足は `TESTING.md` と `TESTING_JA.md` にあります。
-- ツール固有の詳細は `tools/HS2VoiceReplaceGui/README.md` と `tools/HS2VoiceReplaceGui/README_JA.md` を参照してください。
-- `UabAudioClipPatcher` の詳細は `tools/UabAudioClipPatcher/README.md` と `tools/UabAudioClipPatcher/README_JA.md` を参照してください。
-- runtime plugin の詳細は `runtime/HS2VoiceReplace.Runtime/README.md` と `runtime/HS2VoiceReplace.Runtime/README_JA.md` を参照してください。
+- このリポジトリ内で実行した場合、作業データの既定保存先はリポジトリ内の `.hs2voicereplace` フォルダです
+- 作業データの保存先は GUI の基本設定から変更できます
+- runtime 側は小さく保っており、主な制御は GUI 側で行います
 
+## 開発者向け文書
+
+開発向けの情報はこの README には置かず、次の文書に分けています。
+
+- ソース構成とビルド前提
+  - `DEVELOPMENT.md`
+  - `DEVELOPMENT_JA.md`
+- 自動テスト
+  - `TESTING.md`
+  - `TESTING_JA.md`
+- ツール別の開発メモ
+  - `tools/HS2VoiceReplaceGui/README.md`
+  - `tools/HS2VoiceReplaceGui/README_JA.md`
+  - `tools/UabAudioClipPatcher/README.md`
+  - `tools/UabAudioClipPatcher/README_JA.md`
+  - `runtime/HS2VoiceReplace.Runtime/README.md`
+  - `runtime/HS2VoiceReplace.Runtime/README_JA.md`

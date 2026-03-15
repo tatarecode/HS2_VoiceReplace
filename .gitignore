@@ -11,3 +11,9 @@ _tools/python310/
 *.pyc
 *.user
 *.suo
+.vs/
+TestResults/
+artifacts/
+*.nupkg
+*.snupkg
+*.log

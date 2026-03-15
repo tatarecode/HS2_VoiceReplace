@@ -1,129 +1,86 @@
 # HS2VoiceReplace
 
-HS2VoiceReplace is a C# GUI tool for replacing Honey Select 2 voice assets without directly editing a live game installation.
+HS2VoiceReplace is a Windows GUI tool for creating and deploying Honey Select 2 voice-replacement packages.
 
-This export contains the minimum source set required to continue development in a separate repository.
+It is built around a practical workflow: extract original in-game voice files, convert them with Seed-VC toward a supplied reference voice, rebuild game-ready replacements, and deploy them as zipmods plus a small runtime DLL.
+
+The target is an existing personality such as `Composed` or `Obsessed`.
+The tool does not add a new personality slot. It prepares replacement assets for an existing one.
+
+The generated packages are meant to avoid directly editing base game files.
+Deployment is done through `mods` and `BepInEx\plugins`, and the GUI supports per-personality deploy and undeploy.
 
 Japanese documentation is available in `README_JA.md`.
 
-## Repository Layout
+## Prerequisites
 
-- `tools/HS2VoiceReplaceGui`
-  - Main WinForms GUI application (`HS2VoiceReplaceGui.exe`)
-- `runtime/HS2VoiceReplace.Runtime`
-  - Runtime plugin project used by deployed voice-replacement packages
-- `tools/UabAudioClipPatcher`
-  - AudioClip bundle patcher used during bundle rebuild
-- `tools/*.py`
-  - Python helper scripts used for style selection and Seed-VC batch conversion
-- `mods_src/HS2VoiceReplaceRuntime`
-  - Template files used for generated zipmods
-- `tests/HS2VoiceReplace.Tests`
-  - C# automated tests
-- `tests/python`
-  - Python automated tests
+- Windows environment that can run `HS2VoiceReplaceGui.exe`
+- `.NET 8 Desktop Runtime`
+- A Honey Select 2 installation to read source voice files from
+- A target HS2 environment that uses `mods` and `BepInEx\plugins`
+- Reference voice clips for the voice you want to imitate
 
-## What This Export Includes
+The GUI can set up most conversion-side dependencies as part of its workflow.
 
-- Application source code
-- Runtime plugin source code
-- Required helper scripts
-- Test code
-- Minimal packaging template
+## Quick Start
 
-## What This Export Excludes
+- `HS2VoiceReplaceGui.exe`
+  - Main GUI application that coordinates the workflow
+- generated `HS2_VoiceReplace.dll`
+  - Runtime support DLL used by deployed voice-replacement packages
+- generated `HS2VoiceReplace_cXX_*.zipmod`
+  - Per-personality zipmods created by the GUI
 
-- Local build outputs
-- Local publish outputs
-- Machine-specific virtual environments
-- Unrelated historical tooling from the original workspace
+1. Launch `HS2VoiceReplaceGui.exe`
+2. Select the source HS2 folder and the target personality
+3. Provide reference voice clips and run dependency setup if needed
+4. Run extraction, preview, and full conversion
+5. Deploy the generated files from the GUI, or place them manually:
+   - `HS2_VoiceReplace.dll` under `BepInEx\plugins`
+   - `HS2VoiceReplace_cXX_*.zipmod` under `mods`
 
-## Build Prerequisites
+## Seed-VC Settings
 
-### GUI application
+- `v1`
+  - Closer to the original line feel
+  - Good default when replacing existing HS2 voices
+- `v2`
+  - More expressive
+  - Better when you want a stronger shift toward the reference voice
 
-- .NET 8 SDK
-- A separately supplied `AssetsTools.NET.dll`
-  - This repository does not vendor `AssetsTools.NET.dll`
-  - Default source-build path:
-    - `.\_tools\uabea\v8\AssetsTools.NET.dll`
-  - Optional helper script:
-    - `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_assetstools.ps1`
-  - Command-line builds can also use:
-    - `-p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll`
-- Optional repo-local Python for maintained helper scripts and Python tests
-  - Default path:
-    - `.\_tools\python310\python.exe`
-  - Optional helper script:
-    - `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1`
-- GUI-generated working data defaults to a repository-local folder when possible
-  - Default path in a repository checkout:
-    - `.\.hs2voicereplace\`
-  - The output root can be changed from the GUI basic settings dialog
+Common settings:
 
-### Runtime plugin
+- `DiffusionSteps`
+  - Higher = slower but often cleaner
+- `LengthAdjust`
+  - Adjusts line length
+- `IntelligibilityCfgRate`
+  - Makes pronunciation clearer
+- `SimilarityCfgRate`
+  - Pulls harder toward the target voice
+- `Temperature` / `TopP`
+  - Controls how stable or varied the result feels
 
-- .NET Framework 4.7.2 targeting pack
-- Game-side references for:
-  - `BepInEx.dll`
-  - `0Harmony.dll`
-  - `UnityEngine.dll`
-  - `UnityEngine.CoreModule.dll`
-  - `UnityEngine.UI.dll`
+## Notes
 
-The runtime plugin project intentionally does not vendor those game-side assemblies.
+- Generated working data defaults to a repository-local `.hs2voicereplace` folder when running from this repository
+- The working-data root can be changed from the GUI basic settings dialog
+- The runtime side is intentionally small, and the main orchestration stays in the GUI
 
-## Build
+## For Developers
 
-```powershell
-dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release
-dotnet build .\tools\UabAudioClipPatcher\UabAudioClipPatcher.csproj -c Release
-```
+Development-only information is kept out of this README.
 
-If `AssetsTools.NET.dll` is not present at the default path, provide it explicitly:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_assetstools.ps1
-dotnet build .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
-dotnet build .\tools\UabAudioClipPatcher\UabAudioClipPatcher.csproj -c Release -p:AssetsToolsNetPath=C:\path\to\AssetsTools.NET.dll
-```
-
-## Test
-
-Run all C# and Python tests:
-
-```powershell
-.\tools\run_tests.cmd
-```
-
-Or:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\run_tests.ps1
-```
-
-If you want a repository-local Python instead of relying on a machine-wide install:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\setup_local_python.ps1
-```
-
-## Main Development Entry Points
-
-- GUI application:
-  - `tools/HS2VoiceReplaceGui/MainForm.cs`
-- Pipeline orchestration:
-  - `tools/HS2VoiceReplaceGui/VoiceReplacePipeline.cs`
-- Application service layer:
-  - `tools/HS2VoiceReplaceGui/ApplicationServices.cs`
-- Localization catalog:
-  - `tools/HS2VoiceReplaceGui/UiTextCatalog.cs`
-
-## Additional Notes
-
-- `DEVELOPMENT.md` and `DEVELOPMENT_JA.md` describe the code layout and maintenance entry points.
-- `TESTING.md` and `TESTING_JA.md` describe how to run automated tests.
-- `tools/HS2VoiceReplaceGui/README.md` and `tools/HS2VoiceReplaceGui/README_JA.md` document tool-specific behavior and dependency setup.
-- `tools/UabAudioClipPatcher/README.md` and `tools/UabAudioClipPatcher/README_JA.md` document the bundle patcher and its build prerequisites.
-- `runtime/HS2VoiceReplace.Runtime/README.md` and `runtime/HS2VoiceReplace.Runtime/README_JA.md` document the runtime plugin project and its game-side dependencies.
-
+- source layout and build prerequisites:
+  - `DEVELOPMENT.md`
+  - `DEVELOPMENT_JA.md`
+- automated tests:
+  - `TESTING.md`
+  - `TESTING_JA.md`
+- tool-specific development notes:
+  - `tools/HS2VoiceReplaceGui/README.md`
+  - `tools/HS2VoiceReplaceGui/README_JA.md`
+  - `tools/UabAudioClipPatcher/README.md`
+  - `tools/UabAudioClipPatcher/README_JA.md`
+  - `runtime/HS2VoiceReplace.Runtime/README.md`
+  - `runtime/HS2VoiceReplace.Runtime/README_JA.md`
