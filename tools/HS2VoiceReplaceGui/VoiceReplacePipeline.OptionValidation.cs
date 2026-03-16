@@ -55,7 +55,7 @@ private static string SanitizeWavFileName(string fileName)
         }
         if (mode == PipelineMode.BuildOnly)
         {
-            required.Add(Path.Combine("mods_template", "HS2VoiceReplaceRuntime"));
+            required.Add(Path.Combine("mods_template", VoiceReplaceNames.RuntimeTemplateDirName));
             required.Add(Path.Combine("tools", "UabAudioClipPatcher", "UabAudioClipPatcher.exe"));
         }
         if (mode == PipelineMode.DeployOnly && !RuntimePluginExists(o))
@@ -163,7 +163,7 @@ private static string SanitizeWavFileName(string fileName)
             "seed_vc_v2",
             Path.Combine("uabea", "classdata.tpk"),
             Path.Combine("scripts", GetSeedVcInferScriptName(o.SeedVc)),
-            Path.Combine("mods_template", "HS2VoiceReplaceRuntime"),
+            Path.Combine("mods_template", VoiceReplaceNames.RuntimeTemplateDirName),
             Path.Combine("tools", "UabAudioClipPatcher", "UabAudioClipPatcher.exe"),
         };
 

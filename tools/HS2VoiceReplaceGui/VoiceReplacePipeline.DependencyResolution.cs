@@ -102,9 +102,9 @@ private static string GetSeedVcInferScriptName(SeedVcUiSettings seed)
         }
         if (parts.Length == 2 &&
             string.Equals(parts[0], "mods_template", StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(parts[1], "HS2VoiceReplaceRuntime", StringComparison.OrdinalIgnoreCase))
+            string.Equals(parts[1], VoiceReplaceNames.RuntimeTemplateDirName, StringComparison.OrdinalIgnoreCase))
         {
-            list.Add(Path.Combine("mods_src", "HS2VoiceReplaceRuntimeTemplate"));
+            list.Add(Path.Combine("mods_src", VoiceReplaceNames.RuntimeTemplateSourceDirName));
         }
         return list;
     }

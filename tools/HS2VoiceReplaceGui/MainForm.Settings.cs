@@ -23,11 +23,7 @@ public sealed partial class MainForm
                 ChangeUiLanguage(loadedLang);
 
             if (!string.IsNullOrWhiteSpace(s.ExternalToolsRoot)) _txtExternalToolsRoot.Text = s.ExternalToolsRoot!;
-            var hs2Root = !string.IsNullOrWhiteSpace(s.Hs2Root)
-                ? s.Hs2Root
-                : !string.IsNullOrWhiteSpace(s.SourceHs2Root)
-                    ? s.SourceHs2Root
-                    : s.DeployHs2Root;
+            var hs2Root = Hs2RootSettingsUtil.ResolvePersistedHs2Root(s);
             if (!string.IsNullOrWhiteSpace(hs2Root))
                 SetConfiguredHs2Root(hs2Root);
             if (!string.IsNullOrWhiteSpace(s.NormalSample)) _txtNormalSample.Text = s.NormalSample!;

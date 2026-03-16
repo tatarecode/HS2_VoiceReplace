@@ -224,15 +224,12 @@ public sealed partial class MainForm
 
     private string GetConfiguredHs2Root()
     {
-        var source = _txtSourceHs2Root.Text.Trim();
-        if (!string.IsNullOrWhiteSpace(source))
-            return source;
-        return _txtDeployRoot.Text.Trim();
+        return Hs2RootSettingsUtil.FirstNonEmpty(_txtSourceHs2Root.Text, _txtDeployRoot.Text);
     }
 
     private void SetConfiguredHs2Root(string? path)
     {
-        var normalized = string.IsNullOrWhiteSpace(path) ? string.Empty : path.Trim();
+        var normalized = Hs2RootSettingsUtil.FirstNonEmpty(path);
         _txtSourceHs2Root.Text = normalized;
         _txtDeployRoot.Text = normalized;
     }

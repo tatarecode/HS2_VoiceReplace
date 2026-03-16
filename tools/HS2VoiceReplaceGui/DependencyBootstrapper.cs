@@ -112,7 +112,7 @@ internal static partial class DependencyBootstrapper
                 File.Exists(Path.Combine(externalRoot, "scripts", "seed_vc_v2_inprocess_batch.py")) &&
                 File.Exists(Path.Combine(externalRoot, "scripts", "select_voice_style_segment.py")) &&
                 File.Exists(Path.Combine(externalRoot, "tools", "UabAudioClipPatcher", "UabAudioClipPatcher.exe")) &&
-                File.Exists(Path.Combine(externalRoot, "mods_template", "HS2VoiceReplaceRuntime", "manifest.xml")) &&
+                File.Exists(Path.Combine(externalRoot, "mods_template", VoiceReplaceNames.RuntimeTemplateDirName, "manifest.xml")) &&
                 File.Exists(Path.Combine(stateRoot, "aux.version")) &&
                 string.Equals(
                     File.ReadAllText(Path.Combine(stateRoot, "aux.version")).Trim(),

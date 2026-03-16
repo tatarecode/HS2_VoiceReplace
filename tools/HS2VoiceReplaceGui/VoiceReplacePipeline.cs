@@ -46,7 +46,7 @@ internal static partial class VoiceReplacePipeline
         var vgmstreamCli = needsVgmstream ? ResolveDependencyPath(o, "vgmstream", "vgmstream-cli.exe") : "";
         var selectScript = needsSeed ? ResolveDependencyPath(o, "scripts", "select_voice_style_segment.py") : "";
         var inferScript = needsSeed ? ResolveDependencyPath(o, "scripts", GetSeedVcInferScriptName(o.SeedVc)) : "";
-        var templateRoot = needsBuildBundles ? ResolveDependencyPath(o, "mods_template", "HS2VoiceReplaceRuntime") : "";
+        var templateRoot = needsBuildBundles ? ResolveDependencyPath(o, "mods_template", VoiceReplaceNames.RuntimeTemplateDirName) : "";
         var runtimeDll = needsDeploy ? ResolveRuntimePluginPath(o) : "";
         var patcherExe = needsBuildBundles ? ResolveDependencyPath(o, "tools", "UabAudioClipPatcher", "UabAudioClipPatcher.exe") : "";
         var pyExe = needsSeed ? ResolvePythonExe(o) : "";

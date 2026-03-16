@@ -108,7 +108,7 @@ internal static partial class VoiceReplacePipeline
         var selectScript = ResolveDependencyPath(o, "scripts", "select_voice_style_segment.py");
         var inferScript = ResolveDependencyPath(o, "scripts", GetSeedVcInferScriptName(o.SeedVc));
         var classDataPath = ResolveDependencyPath(o, "uabea", "classdata.tpk");
-        var templateRoot = ResolveDependencyPath(o, "mods_template", "HS2VoiceReplaceRuntime");
+        var templateRoot = ResolveDependencyPath(o, "mods_template", VoiceReplaceNames.RuntimeTemplateDirName);
         var runtimeDll = ResolveRuntimePluginPath(o);
         var patcherExe = ResolveDependencyPath(o, "tools", "UabAudioClipPatcher", "UabAudioClipPatcher.exe");
         var pyExe = ResolvePythonExe(o);

@@ -90,7 +90,7 @@ internal static partial class DependencyBootstrapper
 
     private static void EnsureTemplateAsync(string externalRoot, string[] roots, Action<string> log)
     {
-        var dst = Path.Combine(externalRoot, "mods_template", "HS2VoiceReplaceRuntime");
+        var dst = Path.Combine(externalRoot, "mods_template", VoiceReplaceNames.RuntimeTemplateDirName);
         var manifest = Path.Combine(dst, "manifest.xml");
         if (File.Exists(manifest)) return;
 
@@ -98,8 +98,8 @@ internal static partial class DependencyBootstrapper
         {
             var candidates = new[]
             {
-                Path.Combine(root, "mods_template", "HS2VoiceReplaceRuntime"),
-                Path.Combine(root, "mods_src", "HS2VoiceReplaceRuntimeTemplate"),
+                Path.Combine(root, "mods_template", VoiceReplaceNames.RuntimeTemplateDirName),
+                Path.Combine(root, "mods_src", VoiceReplaceNames.RuntimeTemplateSourceDirName),
             };
             foreach (var c in candidates)
             {
@@ -186,7 +186,7 @@ internal static partial class DependencyBootstrapper
             Path.Combine("scripts", "seed_vc_v2_inprocess_batch.py"),
             Path.Combine("scripts", "select_voice_style_segment.py"),
             Path.Combine("tools", "UabAudioClipPatcher"),
-            Path.Combine("mods_template", "HS2VoiceReplaceRuntime"),
+            Path.Combine("mods_template", VoiceReplaceNames.RuntimeTemplateDirName),
             Path.Combine("plugins", VoiceReplaceNames.RuntimePluginFileName),
         };
 
