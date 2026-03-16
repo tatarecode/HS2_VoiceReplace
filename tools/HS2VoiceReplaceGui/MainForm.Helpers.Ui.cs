@@ -11,13 +11,9 @@ public sealed partial class MainForm
         using var dlg = new Form
         {
             Text = title,
-            Width = 560,
-            Height = 170,
             StartPosition = FormStartPosition.CenterParent,
-            FormBorderStyle = FormBorderStyle.FixedDialog,
-            MinimizeBox = false,
-            MaximizeBox = false,
         };
+        UiSizeHelper.ApplyDialogSize(dlg, new Size(560, 190), new Size(480, 170), fixedSize: true);
         var root = new TableLayoutPanel
         {
             Dock = DockStyle.Fill,

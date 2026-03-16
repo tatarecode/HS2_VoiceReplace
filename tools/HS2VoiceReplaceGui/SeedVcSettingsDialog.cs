@@ -21,10 +21,8 @@ internal sealed class SeedVcSettingsDialog : Form
         // description strings are resolved in the current UI language.
         TypeDescriptor.Refresh(typeof(SeedVcUiSettings));
         Text = UiTextCatalog.Get("seedvc.dialog.title");
-        Width = 980;
-        Height = 980;
-        MinimumSize = new Size(900, 760);
         StartPosition = FormStartPosition.CenterParent;
+        UiSizeHelper.ApplyDialogSize(this, new Size(1080, 1040), new Size(920, 760), fixedSize: true);
 
         var root = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1 };
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));

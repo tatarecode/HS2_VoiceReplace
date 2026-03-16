@@ -14,11 +14,9 @@ public sealed partial class MainForm
         var dlg = new Form
         {
             Text = T("general.title"),
-            Width = 980,
-            Height = 620,
-            MinimumSize = new Size(840, 520),
             StartPosition = FormStartPosition.CenterParent,
         };
+        UiSizeHelper.ApplyDialogSize(dlg, new Size(1120, 760), new Size(960, 680), fixedSize: true);
         var host = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(10) };
         dlg.Controls.Add(host);
         var table = new TableLayoutPanel

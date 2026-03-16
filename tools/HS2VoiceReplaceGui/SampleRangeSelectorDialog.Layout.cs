@@ -11,25 +11,59 @@ internal sealed partial class SampleRangeSelectorDialog
         _initialSelection = initialSelection?.Clone();
 
         Text = T("dialog.rangeEditor.title");
-        Width = 1100;
-        Height = 700;
-        MinimumSize = new Size(920, 620);
         StartPosition = FormStartPosition.CenterParent;
-        UiSizeHelper.FitButton(_btnPlaySelection, 130, 34);
-        UiSizeHelper.FitButton(_btnStopPlayback, 80, 34);
+        UiSizeHelper.ApplyDialogSize(this, new Size(1240, 920), new Size(980, 760), fixedSize: true);
+        UiSizeHelper.FitButton(_btnPlaySelection, 120, 36);
+        UiSizeHelper.FitButton(_btnStopPlayback, 90, 36);
+        _waveBox.MinimumSize = new Size(0, 480);
+        _waveBox.Height = 520;
+        _waveBox.Dock = DockStyle.Top;
+        _startTrack.Dock = DockStyle.Top;
 
-        var root = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 5, Padding = new Padding(10) };
+        var shell = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 2,
+        };
+        shell.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        shell.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        Controls.Add(shell);
+
+        var host = new Panel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(10) };
+        shell.Controls.Add(host, 0, 0);
+
+        var root = new TableLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            ColumnCount = 1,
+            RowCount = 4,
+            Width = Math.Max(760, ClientSize.Width - 40),
+        };
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        Controls.Add(root);
+        host.Controls.Add(root);
 
         _lblInfo.Text = T("dialog.rangeEditor.input", _sourceFile);
-        root.Controls.Add(_lblInfo, 0, 0);
         _lblLoading.Text = T("dialog.rangeEditor.loading");
-        root.Controls.Add(_lblLoading, 0, 0);
+        var infoPanel = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            ColumnCount = 1,
+            RowCount = 2,
+            Margin = new Padding(0, 0, 0, 8),
+        };
+        infoPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        infoPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        infoPanel.Controls.Add(_lblLoading, 0, 0);
+        infoPanel.Controls.Add(_lblInfo, 0, 1);
+        root.Controls.Add(infoPanel, 0, 0);
         root.Controls.Add(_waveBox, 0, 1);
         root.Controls.Add(_startTrack, 0, 2);
 
@@ -43,16 +77,58 @@ internal sealed partial class SampleRangeSelectorDialog
         ctrl.Controls.Add(_lblRange);
         root.Controls.Add(ctrl, 0, 3);
 
-        var buttons = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, FlowDirection = FlowDirection.RightToLeft };
+        var buttons = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            FlowDirection = FlowDirection.RightToLeft,
+            Padding = new Padding(10),
+        };
         var ok = new Button { Text = T("button.apply"), DialogResult = DialogResult.OK, Width = 120, Height = 36 };
         var cancel = new Button { Text = T("button.cancel"), DialogResult = DialogResult.Cancel, Width = 120, Height = 36 };
         UiSizeHelper.FitButton(ok, 90, 36);
         UiSizeHelper.FitButton(cancel, 100, 36);
         buttons.Controls.Add(ok);
         buttons.Controls.Add(cancel);
-        root.Controls.Add(buttons, 0, 4);
+        shell.Controls.Add(buttons, 0, 1);
         AcceptButton = ok;
         CancelButton = cancel;
+
+        void FitDialogToContent()
+        {
+            var workingArea = Screen.FromPoint(Cursor.Position).WorkingArea;
+            var chrome = SizeFromClientSize(Size.Empty);
+            var maxClientWidth = Math.Max(900, workingArea.Width - 64 - chrome.Width);
+            var maxClientHeight = Math.Max(720, workingArea.Height - 64 - chrome.Height);
+            var footerPreferred = buttons.GetPreferredSize(new Size(maxClientWidth, 0));
+            var hostPadding = host.Padding.Horizontal + 24;
+            var hostVerticalPadding = host.Padding.Vertical + 24;
+
+            var probeWidth = Math.Min(1240, maxClientWidth);
+            root.Width = Math.Max(760, probeWidth - hostPadding);
+            _lblInfo.MaximumSize = new Size(root.Width - 16, 0);
+            root.PerformLayout();
+
+            var preferred = root.GetPreferredSize(new Size(root.Width, 0));
+            var desiredWidth = Math.Clamp(preferred.Width + hostPadding, 980, maxClientWidth);
+            var desiredHeight = Math.Clamp(preferred.Height + hostVerticalPadding + footerPreferred.Height, 760, maxClientHeight);
+
+            ClientSize = new Size(desiredWidth, desiredHeight);
+            RefreshScrollableLayout();
+        }
+
+        void RefreshScrollableLayout()
+        {
+            var contentWidth = Math.Max(760, host.ClientSize.Width - host.Padding.Horizontal - 8);
+            root.Width = contentWidth;
+            _lblInfo.MaximumSize = new Size(Math.Max(320, contentWidth - 16), 0);
+            root.PerformLayout();
+            var preferred = root.GetPreferredSize(new Size(contentWidth, 0));
+            host.AutoScrollMinSize = new Size(preferred.Width, preferred.Height + 12);
+        }
+
+        host.SizeChanged += (_, _) => RefreshScrollableLayout();
+        Shown += (_, _) => FitDialogToContent();
 
         _numStart.ValueChanged += (_, _) => { if (!_syncing) OnStartChangedByNumeric(); };
         _numDuration.ValueChanged += (_, _) => { if (!_syncing) OnDurationChanged(); };

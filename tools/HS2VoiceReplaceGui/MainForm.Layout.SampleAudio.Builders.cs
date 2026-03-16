@@ -9,11 +9,9 @@ public sealed partial class MainForm
         var dlg = new Form
         {
             Text = T("dialog.sampleAudio.title"),
-            Width = 1320,
-            Height = 900,
-            MinimumSize = new Size(1060, 680),
             StartPosition = FormStartPosition.CenterParent,
         };
+        UiSizeHelper.ApplyDialogSize(dlg, new Size(1500, 980), new Size(1180, 760), fixedSize: true);
 
         root = new TableLayoutPanel
         {
@@ -37,22 +35,32 @@ public sealed partial class MainForm
             Dock = DockStyle.Top,
             AutoSize = true,
             AutoSizeMode = AutoSizeMode.GrowAndShrink,
-            ColumnCount = 4,
+            ColumnCount = 2,
+            RowCount = 3,
+            Margin = new Padding(0, 0, 0, 6),
         };
         assign.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        assign.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-        assign.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        assign.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-        cmbNormal = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 420 };
-        cmbEro = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 420 };
-        assign.Controls.Add(new Label { AutoSize = true, Text = T("dialog.sampleAudio.normalAssignment"), Anchor = AnchorStyles.Left }, 0, 0);
+        assign.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        assign.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        assign.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        assign.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        cmbNormal = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, MinimumSize = new Size(320, 0) };
+        cmbEro = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, MinimumSize = new Size(320, 0) };
+        assign.Controls.Add(new Label { AutoSize = true, Text = T("dialog.sampleAudio.normalAssignment"), Anchor = AnchorStyles.Left, Margin = new Padding(0, 6, 8, 6) }, 0, 0);
         assign.Controls.Add(cmbNormal, 1, 0);
-        assign.Controls.Add(new Label { AutoSize = true, Text = T("dialog.sampleAudio.eroAssignment"), Anchor = AnchorStyles.Left }, 2, 0);
-        assign.Controls.Add(cmbEro, 3, 0);
-        _lblSampleSignatureInDialog = new Label { AutoSize = true, Text = _lblSampleSignature.Text, Margin = new Padding(0, 6, 0, 0) };
-        assign.Controls.Add(new Label { AutoSize = true, Text = T("dialog.sampleAudio.conversionSampleSignature"), Margin = new Padding(0, 6, 6, 0) }, 0, 1);
-        assign.Controls.Add(_lblSampleSignatureInDialog, 1, 1);
-        assign.SetColumnSpan(_lblSampleSignatureInDialog, 3);
+        assign.Controls.Add(new Label { AutoSize = true, Text = T("dialog.sampleAudio.eroAssignment"), Anchor = AnchorStyles.Left, Margin = new Padding(0, 6, 8, 6) }, 0, 1);
+        assign.Controls.Add(cmbEro, 1, 1);
+        _lblSampleSignatureInDialog = new Label
+        {
+            AutoSize = false,
+            Dock = DockStyle.Fill,
+            AutoEllipsis = true,
+            Height = 40,
+            Text = _lblSampleSignature.Text,
+            Margin = new Padding(0, 6, 0, 0),
+        };
+        assign.Controls.Add(new Label { AutoSize = true, Text = T("dialog.sampleAudio.conversionSampleSignature"), Margin = new Padding(0, 10, 8, 0), Anchor = AnchorStyles.Left }, 0, 2);
+        assign.Controls.Add(_lblSampleSignatureInDialog, 1, 2);
         return assign;
     }
 
@@ -123,11 +131,11 @@ public sealed partial class MainForm
             Dock = DockStyle.Top,
             AutoSize = true,
             AutoSizeMode = AutoSizeMode.GrowAndShrink,
-            ColumnCount = 3,
+            ColumnCount = 1,
         };
         bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130));
-        bottom.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130));
+        bottom.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        bottom.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         var previewPanel = new TableLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, ColumnCount = 3 };
         previewPanel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         previewPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
@@ -153,6 +161,14 @@ public sealed partial class MainForm
         previewPanel.Controls.Add(previewAction, 1, 2);
         previewPanel.SetColumnSpan(previewAction, 2);
         bottom.Controls.Add(previewPanel, 0, 0);
+
+        var closePanel = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            FlowDirection = FlowDirection.RightToLeft,
+            Margin = new Padding(0, 8, 0, 0),
+        };
         btnClose = new Button { Text = T("button.close"), Width = 120, Height = 36 };
         UiSizeHelper.FitButton(btnClose, 100, 36);
         btnClose.Click += (_, _) =>
@@ -161,7 +177,8 @@ public sealed partial class MainForm
             SaveUiSettings();
             dlg.Hide();
         };
-        bottom.Controls.Add(btnClose, 2, 0);
+        closePanel.Controls.Add(btnClose);
+        bottom.Controls.Add(closePanel, 0, 1);
         return bottom;
     }
 }

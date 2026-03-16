@@ -14,10 +14,10 @@ internal sealed partial class SampleRangeSelectorDialog : Form
     private readonly NumericUpDown _numStart = new() { DecimalPlaces = 2, Increment = 0.05M, Minimum = 0, Maximum = 99999, Width = 120 };
     private readonly NumericUpDown _numDuration = new() { DecimalPlaces = 2, Increment = 0.10M, Minimum = 0.50M, Maximum = 60.00M, Value = 10.00M, Width = 120 };
     private readonly Label _lblRange = new() { AutoSize = true };
-    private readonly Label _lblInfo = new() { AutoSize = true };
+    private readonly Label _lblInfo = new() { AutoSize = false, Dock = DockStyle.Fill, Height = 48, AutoEllipsis = true };
     private readonly Label _lblLoading = new() { AutoSize = true, ForeColor = Color.DimGray };
-    private readonly Button _btnPlaySelection = new() { Width = 150, Height = 34 };
-    private readonly Button _btnStopPlayback = new() { Width = 90, Height = 34, Enabled = false };
+    private readonly Button _btnPlaySelection = new() { Text = UiTextCatalog.Get("button.play"), Width = 150, Height = 36 };
+    private readonly Button _btnStopPlayback = new() { Text = UiTextCatalog.Get("button.stop"), Width = 110, Height = 36, Enabled = false };
 
     private float[] _envelope = Array.Empty<float>();
     private double _totalSec;
