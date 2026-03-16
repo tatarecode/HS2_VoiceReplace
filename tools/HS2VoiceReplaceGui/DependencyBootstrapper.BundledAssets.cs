@@ -49,6 +49,13 @@ internal static partial class DependencyBootstrapper
 
         foreach (var root in roots)
         {
+            var bundledToolDir = Path.Combine(root, "tools", "UabAudioClipPatcher");
+            if (Directory.Exists(bundledToolDir) && File.Exists(Path.Combine(bundledToolDir, "UabAudioClipPatcher.exe")))
+            {
+                CopyDirectory(bundledToolDir, Path.GetDirectoryName(dstExe)!);
+                return;
+            }
+
             var prebuilt = Path.Combine(root, "tools", "UabAudioClipPatcher", "bin", "Release", "net8.0");
             if (Directory.Exists(prebuilt) && File.Exists(Path.Combine(prebuilt, "UabAudioClipPatcher.exe")))
             {

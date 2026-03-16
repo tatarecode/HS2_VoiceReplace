@@ -174,7 +174,7 @@ function Upload-ReleaseAsset {
     $assetName = Split-Path -Leaf $AssetPath
     $uploadUrl = [string]$Release.upload_url
     $uploadBase = $uploadUrl -replace '\{\?name,label\}$', ''
-    $uploadUri = "$uploadBase?name=$([System.Uri]::EscapeDataString($assetName))"
+    $uploadUri = "${uploadBase}?name=$([System.Uri]::EscapeDataString($assetName))"
 
     Invoke-RestMethod `
         -Method POST `
