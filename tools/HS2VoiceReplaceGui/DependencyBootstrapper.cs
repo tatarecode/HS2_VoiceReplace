@@ -11,6 +11,7 @@ internal static partial class DependencyBootstrapper
     private const string VgmstreamLatestApiUrl = "https://api.github.com/repos/vgmstream/vgmstream/releases/latest";
     private const string FfmpegLatestApiUrl = "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest";
     private const string AuxScriptVersion = "20260306_1";
+    private const string PipInstallWarningSuppression = "--no-warn-script-location";
 
     private static readonly HttpClient Http = new()
     {
@@ -146,7 +147,7 @@ internal static partial class DependencyBootstrapper
 
         log(L("log.installPip"));
         await ProcessUtil.RunAsync(pyExe, $"\"{getPip}\" --disable-pip-version-check", workDir, log, ct);
-        await ProcessUtil.RunAsync(pyExe, "-m pip install --upgrade pip setuptools wheel", workDir, log, ct);
+        await ProcessUtil.RunAsync(pyExe, $"-m pip install {PipInstallWarningSuppression} --upgrade pip setuptools wheel", workDir, log, ct);
         return pyExe;
     }
 
@@ -171,11 +172,11 @@ internal static partial class DependencyBootstrapper
         if (File.Exists(req))
         {
             log(L("log.installSeedVcDeps"));
-            await ProcessUtil.RunAsync(pyExe, $"-m pip install -r \"{req}\"", workDir, log, ct);
+            await ProcessUtil.RunAsync(pyExe, $"-m pip install {PipInstallWarningSuppression} -r \"{req}\"", workDir, log, ct);
         }
 
         // In-process batch script dependency
-        await ProcessUtil.RunAsync(pyExe, "-m pip install noisereduce==3.0.3", workDir, log, ct);
+        await ProcessUtil.RunAsync(pyExe, $"-m pip install {PipInstallWarningSuppression} noisereduce==3.0.3", workDir, log, ct);
 
         var cudaOk = await EnsureTorchCudaAsync(pyExe, workDir, log, ct);
         var marker = Path.Combine(stateRoot, "torch_cuda.ok");
@@ -216,7 +217,7 @@ internal static partial class DependencyBootstrapper
             {
                 await ProcessUtil.RunAsync(
                     pyExe,
-                    $"-m pip install --upgrade --index-url {idxUrl} torch torchvision torchaudio",
+                    $"-m pip install {PipInstallWarningSuppression} --upgrade --index-url {idxUrl} torch torchvision torchaudio",
                     workDir,
                     log,
                     ct);
