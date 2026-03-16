@@ -65,3 +65,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\package_release.ps1 
 ```
 
 この flow では、アプリ側のファイルだけを package します。`external_tools` のような依存インストール先は同梱しません。
+
+その bundle をローカル環境から GitHub Releases に上げる場合は、`GITHUB_TOKEN` または `GH_TOKEN` を設定したうえで次を実行します。
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\publish_github_release.ps1 -GameRoot=C:\path\to\HoneySelect2 -Tag=v1.0.0
+```

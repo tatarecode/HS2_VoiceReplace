@@ -3,7 +3,8 @@ param(
     [string]$GameRoot,
     [string]$OutputRoot = ".\release",
     [string]$PackageLabel = "",
-    [switch]$Force
+    [switch]$Force,
+    [switch]$PassThru
 )
 
 $ErrorActionPreference = "Stop"
@@ -185,6 +186,14 @@ try {
 
     Write-Host "[done] Release folder: $packageRoot"
     Write-Host "[done] Release zip: $zipPath"
+
+    if ($PassThru) {
+        [pscustomobject]@{
+            PackageLabel = $packageLabelValue
+            PackageRoot = $packageRoot
+            ZipPath = $zipPath
+        }
+    }
 }
 finally {
     if (Test-Path $stageRoot) {

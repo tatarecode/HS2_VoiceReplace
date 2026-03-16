@@ -24,6 +24,8 @@ The GUI can set up most conversion-side dependencies as part of its workflow.
 
 ## Quick Start
 
+Download the packaged zip from GitHub Releases and start from `HS2VoiceReplaceGui.exe`.
+
 - `HS2VoiceReplaceGui.exe`
   - Main GUI application that coordinates the workflow
 - generated `HS2_VoiceReplace.dll`
