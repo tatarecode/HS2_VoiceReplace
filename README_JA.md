@@ -1,36 +1,39 @@
 # HS2VoiceReplace
 
-HS2VoiceReplace は、Honey Select 2 のボイス差し替え package を作成して配備するための Windows GUI ツールです。
+HS2VoiceReplace は、Honey Select 2 の既存ボイスを差し替える package を作成し、配備するための Windows GUI ツールです。
 
-元のゲーム音声を抽出し、用意したお手本音声に寄せて Seed-VC で変換し、ゲームで使える差し替えデータとしてまとめます。対象は `クール` や `ヤンデレ` のような既存性格です。新しい性格枠を追加するものではありません。
+元のゲーム音声を抽出し、用意したお手本音声へ Seed-VC で寄せて変換し、ゲームで使える形へ組み直して zipmod と runtime DLL を出力します。
 
-生成物は base game のファイルを直接書き換えず、`mods` と `BepInEx\plugins` を使って追加配置する前提です。GUI から性格ごとの配備と配備解除を行えます。
+対象は `クール` や `ヤンデレ` のような既存性格です。新しい性格枠を追加するのではなく、既存性格向けの差し替えデータを作ります。
+
+生成物は base game のファイルを直接書き換えず、`mods` と `BepInEx\plugins` を使って扱う前提です。GUI から性格ごとの配備と配備解除ができます。
+
+英語版は `README.md` を参照してください。
 
 ## 前提環境
 
 - `HS2VoiceReplaceGui.exe` を実行できる Windows 環境
 - `.NET 8 Desktop Runtime`
-- 抽出元として参照できる Honey Select 2 環境
-- `mods` と `BepInEx\plugins` を使う配備先 HS2 環境
+- `mods` と `BepInEx\plugins` を使う Honey Select 2 環境
 - 寄せたい声のお手本音声
 
-変換側の依存は、GUI のワークフロー内でセットアップできるものがあります。
+変換に必要な依存の多くは、GUI からセットアップできます。
 
 ## クイックスタート
 
 GitHub Releases から配布 zip をダウンロードし、`HS2VoiceReplaceGui.exe` から始めます。
 
 - `HS2VoiceReplaceGui.exe`
-  - ワークフロー全体を操作するメイン GUI
+  - ワークフロー全体をまとめるメイン GUI
 - 生成される `HS2_VoiceReplace.dll`
-  - 配備時に使う runtime DLL
+  - 配備した差し替え package が使う runtime DLL
 - 生成される `HS2VoiceReplace_cXX_*.zipmod`
-  - 性格ごとの zipmod
+  - 性格ごとに作られる zipmod
 
 1. `HS2VoiceReplaceGui.exe` を起動する
-2. HS2 フォルダと対象性格を選ぶ
-3. お手本音声を用意し、必要なら依存セットアップを実行する
-4. 抽出、試聴、全量変換を進める
+2. `HS2フォルダ` と対象性格を選ぶ
+3. お手本音声を追加し、必要なら依存セットアップを実行する
+4. `データ抽出`、`試聴生成`、`全量変換` を進める
 5. GUI から配備するか、生成物を手動配置する
    - `HS2_VoiceReplace.dll` は `BepInEx\plugins`
    - `HS2VoiceReplace_cXX_*.zipmod` は `mods`
@@ -39,35 +42,36 @@ GitHub Releases から配布 zip をダウンロードし、`HS2VoiceReplaceGui.
 
 - `v1`
   - 元のしゃべり方に寄りやすい
-  - 既存ボイス差し替えではまずこれが無難
+  - 既存 HS2 ボイス差し替えではまず無難
 - `v2`
   - 変化を強めに出したいとき向き
 
 よく触る項目:
 
 - `DiffusionSteps`
-  - 上げるほど遅くなるが、結果が安定しやすい
+  - 上げるほど遅いが、きれいになることが多い
 - `LengthAdjust`
   - セリフの長さを調整する
 - `IntelligibilityCfgRate`
-  - 発音の分かりやすさを強める
+  - 発音の明瞭さを強める
 - `SimilarityCfgRate`
   - お手本音声への寄せを強める
 - `Temperature` / `TopP`
-  - 結果の揺れ方を調整する
+  - 結果の安定寄り / 変化寄りを調整する
 
 ## 補足
 
-- このリポジトリから実行した場合、作業データの既定先は repo-local の `.hs2voicereplace` フォルダです
+- このリポジトリから直接実行した場合、作業データの既定保存先は repo-local の `.hs2voicereplace` です
 - 作業データの保存先は GUI の基本設定から変更できます
-- GitHub Actions の artifact では `HS2VoiceReplaceGui.exe/.dll` と `UabAudioClipPatcher.exe/.dll` を取得できます
+- runtime 側は小さく保ち、主な処理は GUI 側に寄せています
+- GitHub Actions の artifact では `HS2VoiceReplaceGui.exe/.dll` と `UabAudioClipPatcher.exe/.dll` を確認できます
 - `HS2_VoiceReplace.dll` は有効な HS2 `GameRoot` が必要なため、ローカル環境でビルドします
 
-## 開発向け情報
+## 開発情報
 
-開発専用の情報はこの README には入れていません。
+開発向けの情報はこの README には入れていません。
 
-- ソース構成とビルド前提
+- 構成とビルド前提
   - `DEVELOPMENT.md`
   - `DEVELOPMENT_JA.md`
 - 自動テスト

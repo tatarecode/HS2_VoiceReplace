@@ -16,8 +16,7 @@ Japanese documentation is available in `README_JA.md`.
 
 - Windows environment that can run `HS2VoiceReplaceGui.exe`
 - `.NET 8 Desktop Runtime`
-- A Honey Select 2 installation to read source voice files from
-- A target HS2 environment that uses `mods` and `BepInEx\plugins`
+- A Honey Select 2 installation that uses `mods` and `BepInEx\plugins`
 - Reference voice clips for the voice you want to imitate
 
 The GUI can set up most conversion-side dependencies as part of its workflow.
@@ -34,7 +33,7 @@ Download the packaged zip from GitHub Releases and start from `HS2VoiceReplaceGu
   - Per-personality zipmods created by the GUI
 
 1. Launch `HS2VoiceReplaceGui.exe`
-2. Select the source HS2 folder and the target personality
+2. Select the HS2 folder and the target personality
 3. Provide reference voice clips and run dependency setup if needed
 4. Run extraction, preview, and full conversion
 5. Deploy the generated files from the GUI, or place them manually:
