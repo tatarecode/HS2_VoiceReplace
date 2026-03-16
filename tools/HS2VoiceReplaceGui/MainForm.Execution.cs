@@ -50,7 +50,7 @@ public sealed partial class MainForm
         try
         {
             var runRoot = GetCurrentRunRoot();
-            var options = BuildOptions(runRoot);
+            var options = BuildOptions(runRoot, requireSamples: false);
             var result = await _appService.RunExtractAsync(options, AppendLog, _cts.Token);
             _lastGridRunRoot = result.RunRoot;
             _embeddedGrid?.SetRunRoot(result.RunRoot, reload: true);
@@ -195,7 +195,7 @@ public sealed partial class MainForm
         try
         {
             var runRoot = GetCurrentRunRoot();
-            var options = BuildOptions(runRoot, deployToBackup: true);
+            var options = BuildOptions(runRoot, deployToBackup: true, requireSamples: false);
             var result = await _appService.RunDeployAsync(options, AppendLog, _cts.Token);
             _lastGridRunRoot = result.RunRoot;
             AppendLog(T("deploy.completed"));
@@ -226,7 +226,7 @@ public sealed partial class MainForm
 
         try
         {
-            var options = BuildOptions(GetCurrentRunRoot());
+            var options = BuildOptions(GetCurrentRunRoot(), requireSamples: false);
             await Task.Run(() => _appService.RunUndeploy(options, AppendLog, _cts.Token), _cts.Token);
             AppendLog(T("undeploy.completed"));
             MessageBox.Show(this, T("undeploy.completedMessage"), T("app.title"), MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -285,22 +285,27 @@ public sealed partial class MainForm
             _btnSampleDialogCancel.Enabled = _isBusy;
     }
 
-    private PipelineOptions BuildOptions(string? runRootOverride = null, bool deployToBackup = false)
+    private PipelineOptions BuildOptions(string? runRootOverride = null, bool deployToBackup = false, bool requireSamples = true)
     {
         ApplyOutputRootChangeFromUi(reloadSampleAssets: false);
         string ResolveUserPath(string p) => Path.GetFullPath(Environment.ExpandEnvironmentVariables(p));
         string ResolveOptionalUserPath(string p) => string.IsNullOrWhiteSpace(p) ? string.Empty : ResolveUserPath(p);
-        EnsureSelectedSampleAssets();
-        SyncSelectedSampleAssetsToTextFields();
+        if (requireSamples)
+        {
+            EnsureSelectedSampleAssets();
+            SyncSelectedSampleAssetsToTextFields();
+        }
         var hs2Root = GetConfiguredHs2Root();
         var normalAsset = GetSampleAssetById(_normalSampleAssetId);
         var eroAsset = GetSampleAssetById(_eroSampleAssetId) ?? normalAsset;
         var normalPathRaw = normalAsset != null ? GetAssetAbsolutePath(normalAsset) : _txtNormalSample.Text.Trim();
         var eroPathRaw = eroAsset != null ? GetAssetAbsolutePath(eroAsset) : _txtEroSample.Text.Trim();
-        if (string.IsNullOrWhiteSpace(normalPathRaw))
+        if (requireSamples && string.IsNullOrWhiteSpace(normalPathRaw))
             throw new InvalidOperationException(T("error.normalSampleMissing"));
-        var normal = ResolveUserPath(normalPathRaw);
-        var ero = string.IsNullOrWhiteSpace(eroPathRaw) ? normal : ResolveUserPath(eroPathRaw);
+        var normal = string.IsNullOrWhiteSpace(normalPathRaw) ? string.Empty : ResolveUserPath(normalPathRaw);
+        var ero = string.IsNullOrWhiteSpace(eroPathRaw)
+            ? normal
+            : ResolveUserPath(eroPathRaw);
         var seed = _seedVc.Clone();
 
         return new PipelineOptions
