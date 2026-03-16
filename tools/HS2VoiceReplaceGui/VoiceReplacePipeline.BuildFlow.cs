@@ -213,6 +213,7 @@ internal static partial class VoiceReplacePipeline
                     paths.RunRoot,
                     sampleNormalCurrent,
                     sampleEroCurrent,
+                    allowExistingFileFallbackWithoutSignature: true,
                     log);
                 if (pending == 0)
                 {
@@ -227,6 +228,8 @@ internal static partial class VoiceReplacePipeline
                 log(L("log.resumeSeedVcPendingOnly", pending));
             }
         }
+
+        File.WriteAllText(seedSigPath, seedSigCurrent, new UTF8Encoding(false));
 
         try
         {

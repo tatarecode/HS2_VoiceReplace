@@ -226,6 +226,7 @@ private static async Task LogTorchRuntimeAsync(string pyExe, string workDir, Act
         string runRoot,
         string currentNormalSig,
         string currentEroSig,
+        bool allowExistingFileFallbackWithoutSignature,
         Action<string> log)
     {
         var rows = LoadManifestRows(fullManifestCsv);
@@ -236,7 +237,8 @@ private static async Task LogTorchRuntimeAsync(string pyExe, string workDir, Act
             outWavRoot,
             sigMap,
             currentNormalSig,
-            currentEroSig);
+            currentEroSig,
+            allowExistingFileFallbackWithoutSignature);
         foreach (var row in pendingRows)
             outLines.Add($"\"{row.RelativePath}\",\"{row.Bucket}\",\"{row.SourceFile.Replace("\"", "\"\"")}\"");
         File.WriteAllLines(pendingManifestCsv, outLines, new UTF8Encoding(false));

@@ -46,5 +46,47 @@ public sealed class VoiceReplaceFreshnessUtilTests
             tempRoot.Delete(true);
         }
     }
+
+    [Fact]
+    public void BuildPendingRows_ReusesExistingFilesWhenResumeFallbackIsEnabled()
+    {
+        var tempRoot = Directory.CreateTempSubdirectory("hs2vr_pending_resume_");
+        try
+        {
+            var outRoot = Path.Combine(tempRoot.FullName, "voice_replace_wav");
+            Directory.CreateDirectory(Path.Combine(outRoot, "adv"));
+            var existingPath = Path.Combine(outRoot, "adv", "existing.wav");
+            File.WriteAllText(existingPath, "ok");
+
+            var rows = new[]
+            {
+                ("adv/existing.wav", "normal", "src1.wav"),
+                ("adv/missing.wav", "normal", "src2.wav"),
+            };
+
+            var sigMap = new Dictionary<string, VoiceReplaceFreshnessUtil.SignatureMapRow>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["adv/existing.wav"] = new("adv/existing.wav", "normal", existingPath, "", "", ""),
+            };
+
+            var (pending, summary) = VoiceReplaceFreshnessUtil.BuildPendingRows(
+                rows,
+                outRoot,
+                sigMap,
+                "n",
+                "e",
+                allowExistingFileFallbackWithoutSignature: true);
+
+            Assert.Single(pending);
+            Assert.Equal("adv/missing.wav", pending[0].RelativePath);
+            Assert.Equal(0, summary.MissingFileOnly);
+            Assert.Equal(0, summary.SigMismatchOnly);
+            Assert.Equal(1, summary.MissingAndSigMismatch);
+        }
+        finally
+        {
+            tempRoot.Delete(true);
+        }
+    }
 }
 

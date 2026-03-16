@@ -11,7 +11,8 @@ internal static class VoiceReplaceFreshnessUtil
         string outWavRoot,
         IReadOnlyDictionary<string, SignatureMapRow> sigMap,
         string currentNormalSig,
-        string currentEroSig)
+        string currentEroSig,
+        bool allowExistingFileFallbackWithoutSignature = false)
     {
         var pendingRows = new List<(string RelativePath, string Bucket, string SourceFile)>();
         var missingFileOnly = 0;
@@ -32,8 +33,12 @@ internal static class VoiceReplaceFreshnessUtil
             sigMap.TryGetValue(rel, out var mapRow);
             var sigMatched = !string.IsNullOrWhiteSpace(mapRow.SigUsed) &&
                 string.Equals(mapRow.SigUsed, expectedSig, StringComparison.OrdinalIgnoreCase);
+            var canReuseWithoutSignature =
+                allowExistingFileFallbackWithoutSignature &&
+                fileExists &&
+                string.IsNullOrWhiteSpace(mapRow.SigUsed);
 
-            if (fileExists && sigMatched)
+            if (fileExists && (sigMatched || canReuseWithoutSignature))
                 continue;
 
             if (!fileExists && !sigMatched) missingAndSigMismatch++;
