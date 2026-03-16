@@ -45,6 +45,7 @@ This document is intended for a new developer starting from this export only.
 - GUI and `UabAudioClipPatcher` source builds depend on a separately supplied `AssetsTools.NET.dll`
 - This repository does not vendor `AssetsTools.NET.dll`
 - Runtime plugin build depends on game-side Unity and BepInEx assemblies
+- `HS2_VoiceReplace.dll` is intentionally kept as a local build target because it depends on `GameRoot`
 - Runtime execution may download external tools during dependency setup
 - Python tests can use a repo-local interpreter at `.\_tools\python310\python.exe`
 - `tools/setup_local_python.ps1` provisions that repo-local Python from the official embeddable Python distribution declared in `tools/python_runtime_manifest.json`
@@ -54,3 +55,13 @@ This document is intended for a new developer starting from this export only.
 - Keep user-facing text in `UiTextCatalog.cs`
 - Keep new logic testable by extracting pure helpers where possible
 - Avoid introducing machine-local paths or personal identifiers into source, templates, or generated defaults
+
+## Release Packaging
+
+Use the local packaging flow when you need a release bundle that includes the GUI, the patcher, and the locally built runtime DLL:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\package_release.ps1 -GameRoot=C:\path\to\HoneySelect2
+```
+
+This flow intentionally packages app-side files only. It does not vendor dependency-install outputs such as `external_tools`.

@@ -44,3 +44,25 @@ jobs:
       - name: Verify patcher build
         shell: pwsh
         run: dotnet build .\tools\UabAudioClipPatcher\UabAudioClipPatcher.csproj -c Release --nologo
+
+      - name: Publish GUI artifact
+        shell: pwsh
+        run: dotnet publish .\tools\HS2VoiceReplaceGui\HS2VoiceReplaceGui.csproj -c Release -r win-x64 --self-contained false -o .\artifacts\HS2VoiceReplaceGui --nologo
+
+      - name: Publish patcher artifact
+        shell: pwsh
+        run: dotnet publish .\tools\UabAudioClipPatcher\UabAudioClipPatcher.csproj -c Release -r win-x64 --self-contained false -o .\artifacts\UabAudioClipPatcher --nologo
+
+      - name: Upload GUI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: HS2VoiceReplaceGui-win-x64
+          path: .\artifacts\HS2VoiceReplaceGui
+          if-no-files-found: error
+
+      - name: Upload patcher artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: UabAudioClipPatcher-win-x64
+          path: .\artifacts\UabAudioClipPatcher
+          if-no-files-found: error

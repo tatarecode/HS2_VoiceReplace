@@ -77,6 +77,7 @@ dotnet build .\runtime\HS2VoiceReplace.Runtime\HS2VoiceReplace.Runtime.csproj -c
 ```
 
 この確認には、期待される BepInEx / Unity DLL を含む有効な `GameRoot` が必要です。
+この確認はローカル環境向けで、現在の GitHub Actions には含めていません。
 
 ## 補足
 
@@ -86,3 +87,5 @@ dotnet build .\runtime\HS2VoiceReplace.Runtime\HS2VoiceReplace.Runtime.csproj -c
 - PowerShell の実行制限がある場合は `.\tools\run_tests.cmd` を使ってください。
 - C# テストは `xUnit` と `dotnet test` を使用します。
 - ユーザー向け文言や localization metadata を変更した場合は、関連する C# テストも更新してください。
+- GitHub Actions では GUI と patcher の publish 出力を artifact として取得できます。
+- `HS2_VoiceReplace.dll` は `GameRoot` 依存のため、ローカルビルド対象のままです。

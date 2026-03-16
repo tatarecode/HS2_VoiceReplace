@@ -66,6 +66,8 @@ Common settings:
 - Generated working data defaults to a repository-local `.hs2voicereplace` folder when running from this repository
 - The working-data root can be changed from the GUI basic settings dialog
 - The runtime side is intentionally small, and the main orchestration stays in the GUI
+- GitHub Actions artifacts provide `HS2VoiceReplaceGui.exe/.dll` and `UabAudioClipPatcher.exe/.dll`
+- `HS2_VoiceReplace.dll` is built locally because it depends on a valid HS2 `GameRoot`
 
 ## For Developers
 

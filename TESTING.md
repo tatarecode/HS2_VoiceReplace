@@ -77,6 +77,7 @@ dotnet build .\runtime\HS2VoiceReplace.Runtime\HS2VoiceReplace.Runtime.csproj -c
 ```
 
 This check requires a valid `GameRoot` with the expected BepInEx and Unity assemblies.
+It is a local-environment check, not part of the current GitHub Actions workflow.
 
 ## Notes
 
@@ -86,3 +87,5 @@ This check requires a valid `GameRoot` with the expected BepInEx and Unity assem
 - If PowerShell script execution is restricted, use `.\tools\run_tests.cmd`.
 - C# tests use `xUnit` and `dotnet test`.
 - If you add user-facing strings or localization metadata, update the related C# tests as well.
+- GitHub Actions currently uploads GUI and patcher publish outputs as artifacts.
+- `HS2_VoiceReplace.dll` remains a local build target because it depends on `GameRoot`.
