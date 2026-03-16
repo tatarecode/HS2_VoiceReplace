@@ -15,8 +15,7 @@ public sealed partial class MainForm : Form
     private readonly TextBox _txtBundleRoot = new() { Dock = DockStyle.Fill, ReadOnly = true, TabStop = false };
     private readonly TextBox _txtExternalToolsRoot = new() { Dock = DockStyle.Fill };
     private readonly TextBox _txtOutputRoot = new() { Dock = DockStyle.Fill };
-    private readonly TextBox _txtSourceHs2Root = new() { Dock = DockStyle.Fill };
-    private readonly TextBox _txtDeployRoot = new() { Dock = DockStyle.Fill };
+    private readonly TextBox _txtHs2Root = new() { Dock = DockStyle.Fill };
     private readonly ComboBox _cmbPersonality = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 220 };
     private readonly TextBox _txtNormalSample = new() { Dock = DockStyle.Fill };
     private readonly TextBox _txtEroSample = new() { Dock = DockStyle.Fill };
@@ -151,8 +150,7 @@ public sealed partial class MainForm : Form
         _btnEditEroSegment.Click += (_, _) => OpenRangeEditor(isEro: true);
         _btnClearNormalSegment.Click += (_, _) => ClearManualRange(isEro: false);
         _btnClearEroSegment.Click += (_, _) => ClearManualRange(isEro: true);
-        _txtSourceHs2Root.TextChanged += (_, _) => RefreshActionAvailability();
-        _txtDeployRoot.TextChanged += (_, _) => RefreshActionAvailability();
+        _txtHs2Root.TextChanged += (_, _) => RefreshActionAvailability();
         _txtOutputRoot.Leave += (_, _) => ApplyOutputRootChangeFromUi(reloadSampleAssets: true);
         _cmbPersonality.SelectedIndexChanged += (_, _) =>
         {

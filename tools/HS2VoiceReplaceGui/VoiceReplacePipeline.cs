@@ -39,7 +39,7 @@ internal static partial class VoiceReplacePipeline
         var needsExtractDeps = mode is PipelineMode.ExtractOnly or PipelineMode.PreviewOnly or PipelineMode.BuildOnly;
         var needsVgmstream = mode is PipelineMode.ExtractOnly or PipelineMode.PreviewOnly;
         var needsBuildBundles = mode == PipelineMode.BuildOnly;
-        var needsDeploy = mode == PipelineMode.DeployOnly || o.DeployToBackup;
+        var needsDeploy = mode == PipelineMode.DeployOnly || o.DeployAfterBuild;
 
         var seedVcRoot = needsSeed ? ResolveSeedVcRoot(o, o.SeedVc) : "";
         var classDataPath = needsExtractDeps ? ResolveDependencyPath(o, "uabea", "classdata.tpk") : "";
@@ -160,6 +160,9 @@ internal static partial class VoiceReplacePipeline
 
         if (mode == PipelineMode.DeployOnly)
         {
+            if (!HasExpectedConvertedWavs(manifest, paths.OutWavRoot))
+                throw new InvalidOperationException(L("error.deployIncompleteOutputs"));
+
             var deployZipmods = Directory.GetFiles(paths.SplitOutRoot, $"HS2VoiceReplace_{pid}_*.zipmod", SearchOption.TopDirectoryOnly)
                 .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
                 .ToList();

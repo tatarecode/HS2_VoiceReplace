@@ -93,8 +93,7 @@ public sealed partial class MainForm
         Detach(_txtBundleRoot);
         Detach(_txtOutputRoot);
         Detach(_txtExternalToolsRoot);
-        Detach(_txtSourceHs2Root);
-        Detach(_txtDeployRoot);
+        Detach(_txtHs2Root);
         Detach(_chkSkipCompleted);
         Detach(_txtPreviewNormal);
         Detach(_txtPreviewEro);

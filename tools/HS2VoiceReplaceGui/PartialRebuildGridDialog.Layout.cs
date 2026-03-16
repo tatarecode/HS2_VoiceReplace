@@ -30,52 +30,109 @@ internal sealed partial class PartialRebuildGridDialog
         UiSizeHelper.FitButton(_btnReload, 100, 36);
         UiSizeHelper.FitButton(_btnRunFull, 120, 36);
         UiSizeHelper.FitButton(_btnStopFull, 90, 36);
+        _btnReload.Margin = new Padding(0, 0, 8, 0);
+        _btnRunFull.Margin = new Padding(0, 0, 8, 0);
+        _btnStopFull.Margin = new Padding(0);
         Width = 1780;
         Height = 980;
         MinimumSize = new Size(1320, 780);
         StartPosition = FormStartPosition.CenterParent;
 
-        var root = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 4, Padding = new Padding(10) };
+        UiSizeHelper.FitButton(_btnPlaySelectedSrc, 110, 36);
+        UiSizeHelper.FitButton(_btnPlaySelectedDst, 130, 36);
+        UiSizeHelper.FitButton(_btnRebuildSelected, 140, 36);
+        UiSizeHelper.FitButton(_btnDiscardSelected, 130, 36);
+        _btnPlaySelectedSrc.Margin = new Padding(8, 0, 0, 0);
+        _btnPlaySelectedDst.Margin = new Padding(8, 0, 0, 0);
+        _btnRebuildSelected.Margin = new Padding(8, 0, 0, 0);
+        _btnDiscardSelected.Margin = new Padding(8, 0, 0, 0);
+
+        var root = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 5, Padding = new Padding(10) };
+        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         Controls.Add(root);
 
-        var head = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = showCloseButton ? 5 : 4, AutoSize = true };
+        var head = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = showCloseButton ? 3 : 2, AutoSize = true, Margin = new Padding(0) };
         head.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        head.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
-        head.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150));
-        head.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
+        head.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         if (showCloseButton)
-            head.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
+            head.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         head.Controls.Add(_txtRunRoot, 0, 0);
-        head.Controls.Add(_btnReload, 1, 0);
-        head.Controls.Add(_btnRunFull, 2, 0);
-        head.Controls.Add(_btnStopFull, 3, 0);
+        var globalActions = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            WrapContents = false,
+            Margin = new Padding(0),
+            Padding = new Padding(0),
+            FlowDirection = FlowDirection.RightToLeft,
+            Anchor = AnchorStyles.Top | AnchorStyles.Right,
+        };
+        globalActions.Controls.Add(_btnStopFull);
+        globalActions.Controls.Add(_btnRunFull);
+        globalActions.Controls.Add(_btnReload);
+        globalActions.Controls.Add(new Label
+        {
+            AutoSize = true,
+            Text = T("dialog.partialGrid.group.global"),
+            Margin = new Padding(0, 10, 8, 0),
+        });
+        head.Controls.Add(globalActions, 1, 0);
         Button? close = null;
         if (showCloseButton)
         {
             close = new Button { Text = T("button.close"), DialogResult = DialogResult.OK, Width = 110, Height = 36 };
             UiSizeHelper.FitButton(close, 90, 36);
-            head.Controls.Add(close, 4, 0);
+            close.Margin = new Padding(8, 0, 0, 0);
+            head.Controls.Add(close, 2, 0);
         }
         root.Controls.Add(head, 0, 0);
 
+        var selectionRow = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            Margin = new Padding(0, 6, 0, 2),
+            Padding = new Padding(0),
+            WrapContents = false,
+            FlowDirection = FlowDirection.RightToLeft,
+            Anchor = AnchorStyles.Top | AnchorStyles.Right,
+        };
+        selectionRow.Controls.Add(_btnPlaySelectedDst);
+        selectionRow.Controls.Add(_btnPlaySelectedSrc);
+        selectionRow.Controls.Add(_btnDiscardSelected);
+        selectionRow.Controls.Add(_btnRebuildSelected);
+        selectionRow.Controls.Add(new Label
+        {
+            AutoSize = true,
+            Text = T("dialog.partialGrid.group.selection"),
+            Margin = new Padding(0, 10, 8, 0),
+        });
+        root.Controls.Add(selectionRow, 0, 1);
+
         SetupGrid();
         _lblEmptyState.Text = T("dialog.partialGrid.empty.extractFirst");
+        _gridPanel.Margin = new Padding(0);
+        _gridPanel.Padding = new Padding(0);
         _gridPanel.Controls.Add(_grid);
         _gridPanel.Controls.Add(_lblEmptyState);
-        root.Controls.Add(_gridPanel, 0, 1);
-        root.Controls.Add(_pbFull, 0, 2);
-        root.Controls.Add(_lblStatus, 0, 3);
+        root.Controls.Add(_gridPanel, 0, 2);
+        root.Controls.Add(_pbFull, 0, 3);
+        root.Controls.Add(_lblStatus, 0, 4);
 
         _txtRunRoot.Text = string.IsNullOrWhiteSpace(initialRunRoot) ? "" : Path.GetFullPath(initialRunRoot);
         _btnReload.Click += (_, _) => ReloadRows();
         _btnRunFull.Click += async (_, _) => await RunFullAsync();
         _btnStopFull.Click += (_, _) => RequestStopFullRun();
-        _grid.CellContentClick += async (_, e) => await OnGridCellContentClickAsync(e);
+        _btnPlaySelectedSrc.Click += (_, _) => PlaySelectedSource();
+        _btnPlaySelectedDst.Click += (_, _) => PlaySelectedConverted();
+        _btnRebuildSelected.Click += async (_, _) => await RebuildSelectedRowsAsync();
+        _btnDiscardSelected.Click += (_, _) => DiscardSelectedRows();
         _grid.CellFormatting += (_, e) => OnGridCellFormatting(e);
+        _grid.SelectionChanged += (_, _) => RefreshSelectionActionAvailability();
         FormClosing += (_, _) => { try { _activePlayer?.Stop(); _activePlayer?.Dispose(); } catch { } _activePlayer = null; };
         _grid.CurrentCellDirtyStateChanged += (_, _) =>
         {
@@ -99,7 +156,7 @@ internal sealed partial class PartialRebuildGridDialog
     {
         _grid.AutoGenerateColumns = false;
         _grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        _grid.MultiSelect = false;
+        _grid.MultiSelect = true;
         _grid.ReadOnly = false;
         _grid.ScrollBars = ScrollBars.Both;
         _grid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
@@ -170,42 +227,24 @@ internal sealed partial class PartialRebuildGridDialog
         });
         _grid.Columns.Add(new DataGridViewTextBoxColumn
         {
+            DataPropertyName = nameof(PartialRebuildGridRow.SampleNameUsed),
+            HeaderText = T("dialog.partialGrid.column.sampleUsed"),
+            ReadOnly = true,
+            Width = 180
+        });
+        _grid.Columns.Add(new DataGridViewTextBoxColumn
+        {
             DataPropertyName = nameof(PartialRebuildGridRow.SampleSignatureUsed),
             HeaderText = T("dialog.partialGrid.column.signatureUsed"),
             ReadOnly = true,
             Width = 260
         });
-        _grid.Columns.Add(new DataGridViewButtonColumn
+        _grid.Columns.Add(new DataGridViewTextBoxColumn
         {
-            HeaderText = T("dialog.partialGrid.column.playSrc"),
-            Text = T("button.playSrc"),
-            UseColumnTextForButtonValue = true,
-            Width = 110,
-            Name = "btnPlaySrc"
-        });
-        _grid.Columns.Add(new DataGridViewButtonColumn
-        {
-            HeaderText = T("dialog.partialGrid.column.playDst"),
-            Text = T("button.playDst"),
-            UseColumnTextForButtonValue = true,
-            Width = 130,
-            Name = "btnPlayDst"
-        });
-        _grid.Columns.Add(new DataGridViewButtonColumn
-        {
-            HeaderText = T("dialog.partialGrid.column.rebuild"),
-            Text = T("button.rebuildRow"),
-            UseColumnTextForButtonValue = true,
-            Width = 150,
-            Name = "btnRebuildRow"
-        });
-        _grid.Columns.Add(new DataGridViewButtonColumn
-        {
-            HeaderText = T("dialog.partialGrid.column.discard"),
-            Text = T("button.discardDst"),
-            UseColumnTextForButtonValue = true,
-            Width = 130,
-            Name = "btnDiscardDst"
+            DataPropertyName = nameof(PartialRebuildGridRow.SeedVcSummary),
+            HeaderText = T("dialog.partialGrid.column.seedVcSummary"),
+            ReadOnly = true,
+            Width = 360
         });
 
         _grid.DataSource = _rows;
@@ -214,10 +253,29 @@ internal sealed partial class PartialRebuildGridDialog
     private void SetBusyControls()
     {
         var ownerBusy = _isOwnerBusy();
-        _grid.Enabled = !ownerBusy && !_busy;
+        _grid.Enabled = true;
+        _grid.ReadOnly = ownerBusy || _busy;
         _btnReload.Enabled = !ownerBusy && !_busy;
         _btnRunFull.Enabled = !ownerBusy && !_busy && _canRunFull();
         _btnStopFull.Enabled = _busy && _fullRunExecuting;
+        RefreshSelectionActionAvailability();
+    }
+
+    private void RefreshSelectionActionAvailability()
+    {
+        var selectedRows = GetSelectedRows();
+        var singleSelected = selectedRows.Count == 1;
+        var anySelected = selectedRows.Count > 0;
+        var canPlaySrc = singleSelected && selectedRows[0].SourceExists;
+        var canPlayDst = singleSelected && selectedRows[0].ConvertedExists;
+        var canRebuild = anySelected && selectedRows.All(x => x.SourceExists);
+        var canDiscard = selectedRows.Any(x => x.ConvertedExists);
+        var canMutate = !_isOwnerBusy() && !_busy;
+
+        _btnPlaySelectedSrc.Enabled = canPlaySrc;
+        _btnPlaySelectedDst.Enabled = canPlayDst;
+        _btnRebuildSelected.Enabled = canMutate && canRebuild;
+        _btnDiscardSelected.Enabled = canMutate && canDiscard;
     }
 
     public void RefreshCommandAvailability()

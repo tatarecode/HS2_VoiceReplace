@@ -7,6 +7,14 @@ namespace HS2VoiceReplace;
 
 internal sealed partial class PartialRebuildGridDialog
 {
+    private List<PartialRebuildGridRow> GetSelectedRows()
+        => _grid.SelectedRows
+            .Cast<DataGridViewRow>()
+            .Where(x => x.DataBoundItem is PartialRebuildGridRow)
+            .Select(x => (PartialRebuildGridRow)x.DataBoundItem!)
+            .Distinct()
+            .ToList();
+
     private async Task RunFullAsync()
     {
         if (_busy || _isOwnerBusy())
@@ -47,66 +55,83 @@ internal sealed partial class PartialRebuildGridDialog
         }
     }
 
-    private async Task OnGridCellContentClickAsync(DataGridViewCellEventArgs e)
+    private void PlaySelectedSource()
     {
-        if (e.RowIndex < 0 || e.ColumnIndex < 0)
+        var selected = GetSelectedRows();
+        if (selected.Count != 1)
             return;
+        PlayWav(selected[0].SourceFile, T("dialog.sampleAudio.column.source"));
+    }
 
-        var row = _rows[e.RowIndex];
-        var colName = _grid.Columns[e.ColumnIndex].Name;
-        if (_isOwnerBusy())
+    private void PlaySelectedConverted()
+    {
+        var selected = GetSelectedRows();
+        if (selected.Count != 1)
             return;
-        if (colName == "btnPlaySrc")
-        {
-            PlayWav(row.SourceFile, T("dialog.sampleAudio.column.source"));
+        PlayWav(selected[0].ConvertedFile, T("button.playDst"));
+    }
+
+    private async Task RebuildSelectedRowsAsync()
+    {
+        if (_busy || _isOwnerBusy())
             return;
-        }
-        if (colName == "btnPlayDst")
-        {
-            PlayWav(row.ConvertedFile, T("button.playDst"));
-            return;
-        }
-        if (_busy)
-            return;
-        if (colName == "btnDiscardDst")
-        {
-            DiscardConverted(row);
-            _grid.InvalidateRow(e.RowIndex);
-            return;
-        }
-        if (colName != "btnRebuildRow")
+        var selected = GetSelectedRows();
+        if (selected.Count == 0)
             return;
 
         _busy = true;
         SetBusyControls();
-        row.Status = T("dialog.partialGrid.status.rebuilding");
-        _grid.InvalidateRow(e.RowIndex);
+        foreach (var row in selected)
+        {
+            row.Status = T("dialog.partialGrid.status.rebuilding");
+            RefreshBoundRow(row);
+        }
 
+        var rebuilt = new List<string>();
         try
         {
-            row.Bucket = (row.Bucket ?? "").Trim().ToLowerInvariant() == "ero" ? "ero" : "normal";
-            var rebuiltRel = row.RelativePath;
-            var outWav = await _onRebuild(row);
-            row.ConvertedFile = outWav;
-            row.SourceExists = File.Exists(row.SourceFile);
-            row.ConvertedExists = File.Exists(row.ConvertedFile);
-            row.SampleSignatureUsed = row.Bucket == "ero" ? row.SampleSignatureEro : row.SampleSignatureNormal;
-            SaveSampleSignatureMapForRun(row.RunRoot);
+            foreach (var row in selected)
+            {
+                row.Bucket = (row.Bucket ?? "").Trim().ToLowerInvariant() == "ero" ? "ero" : "normal";
+                var outWav = await _onRebuild(row);
+                row.ConvertedFile = outWav;
+                row.SourceExists = File.Exists(row.SourceFile);
+                row.ConvertedExists = File.Exists(row.ConvertedFile);
+                if (row.ConvertedExists)
+                    FillDisplayedConversionMetadata(row);
+                RefreshBoundRow(row);
+                rebuilt.Add(row.RelativePath);
+            }
             ReloadRows();
-            if (_rowByRel.TryGetValue(rebuiltRel, out var refreshedRow))
-                refreshedRow.Status = T("dialog.partialGrid.status.doneAt", DateTime.Now.ToString("HH:mm:ss", CultureInfo.InvariantCulture));
-            _lblStatus.Text = T("dialog.partialGrid.status.updatedPath", rebuiltRel);
-            _onLog($"grid rebuild done: {rebuiltRel}");
+            var now = DateTime.Now.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
+            foreach (var rel in rebuilt)
+            {
+                if (_rowByRel.TryGetValue(rel, out var refreshedRow))
+                {
+                    refreshedRow.Status = T("dialog.partialGrid.status.doneAt", now);
+                    RefreshBoundRow(refreshedRow);
+                }
+            }
+            _lblStatus.Text = T("dialog.partialGrid.status.updatedRows", rebuilt.Count);
+            _onLog($"grid rebuild done: rows={rebuilt.Count}");
         }
         catch (OperationCanceledException)
         {
-            row.Status = T("dialog.partialGrid.status.cancelRequested");
+            foreach (var row in selected)
+            {
+                row.Status = T("dialog.partialGrid.status.cancelRequested");
+                RefreshBoundRow(row);
+            }
             _lblStatus.Text = T("dialog.partialGrid.status.cancelRequested");
             _onLog("grid rebuild cancelled");
         }
         catch (Exception ex)
         {
-            row.Status = T("dialog.partialGrid.status.failed");
+            foreach (var row in selected)
+            {
+                row.Status = T("dialog.partialGrid.status.failed");
+                RefreshBoundRow(row);
+            }
             _lblStatus.Text = T("dialog.partialGrid.status.errorWithMessage", ex.Message);
             _onLog("grid rebuild failed: " + ex.Message);
             MessageBox.Show(this, ex.ToString(), T("dialog.error.rebuild"), MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -115,7 +140,6 @@ internal sealed partial class PartialRebuildGridDialog
         {
             _busy = false;
             SetBusyControls();
-            _grid.InvalidateRow(e.RowIndex);
         }
     }
 
@@ -166,6 +190,26 @@ internal sealed partial class PartialRebuildGridDialog
             _lblStatus.Text = T("dialog.partialGrid.status.noCancelableWork");
     }
 
+    private void DiscardSelectedRows()
+    {
+        if (_busy || _isOwnerBusy())
+            return;
+        var selected = GetSelectedRows();
+        if (selected.Count == 0)
+            return;
+
+        try
+        {
+            foreach (var row in selected)
+                DiscardConverted(row);
+            _lblStatus.Text = T("dialog.partialGrid.status.discardedRows", selected.Count);
+            _grid.Invalidate();
+        }
+        catch
+        {
+        }
+    }
+
     private void DiscardConverted(PartialRebuildGridRow row)
     {
         try
@@ -173,7 +217,11 @@ internal sealed partial class PartialRebuildGridDialog
             if (!string.IsNullOrWhiteSpace(row.ConvertedFile) && File.Exists(row.ConvertedFile))
                 File.Delete(row.ConvertedFile);
             row.ConvertedExists = false;
+            row.SampleNameUsed = "";
+            row.SampleSignatureUsed = "";
+            row.SeedVcSummary = "";
             row.Status = T("dialog.partialGrid.status.discardedAt", DateTime.Now.ToString("HH:mm:ss", CultureInfo.InvariantCulture));
+            RefreshBoundRow(row);
             _lblStatus.Text = T("dialog.partialGrid.status.discardedPath", row.RelativePath);
             _onLog($"grid discard converted: {row.RelativePath}");
         }
@@ -210,15 +258,42 @@ internal sealed partial class PartialRebuildGridDialog
             var raw = statusMatch.Groups["status"].Value;
             row.Status = BuildDisplayStatus(raw, File.Exists(row.ConvertedFile));
             if (raw is "ok" or "fallback_src" or "fallback_silence")
+            {
                 row.ConvertedExists = File.Exists(row.ConvertedFile);
+                if (row.ConvertedExists)
+                    FillDisplayedConversionMetadata(row);
+            }
+            RefreshBoundRow(row);
         }
         else if (line.Contains(" start ", StringComparison.OrdinalIgnoreCase))
         {
             if (progressIndex.HasValue)
                 _relByProgressIndex[progressIndex.Value] = rel;
             row.Status = T("dialog.partialGrid.status.converting");
+            RefreshBoundRow(row);
         }
-        if (_rowIndexByRel.TryGetValue(rel, out var idx) && idx >= 0 && idx < _grid.Rows.Count)
+    }
+
+    private static void FillDisplayedConversionMetadata(PartialRebuildGridRow row)
+    {
+        row.SampleSignatureUsed = string.Equals(row.Bucket, "ero", StringComparison.OrdinalIgnoreCase)
+            ? row.SampleSignatureEro
+            : row.SampleSignatureNormal;
+        row.SampleNameUsed = string.Equals(row.Bucket, "ero", StringComparison.OrdinalIgnoreCase)
+            ? row.SampleNameEro
+            : row.SampleNameNormal;
+        row.SeedVcSummary = row.SeedVcSummaryStored;
+    }
+
+    private void RefreshBoundRow(PartialRebuildGridRow row)
+    {
+        if (!_rowIndexByRel.TryGetValue(row.RelativePath, out var idx))
+            return;
+        if (idx < 0 || idx >= _rows.Count)
+            return;
+
+        _rows.ResetItem(idx);
+        if (idx < _grid.Rows.Count)
             _grid.InvalidateRow(idx);
     }
 

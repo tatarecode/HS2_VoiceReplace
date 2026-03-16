@@ -24,8 +24,8 @@ private static string SanitizeWavFileName(string fileName)
         if (!Directory.Exists(o.OutputBaseRoot)) Directory.CreateDirectory(o.OutputBaseRoot);
         if (mode != PipelineMode.DeployOnly)
         {
-            if (!Directory.Exists(o.SourceHs2Root))
-                throw new DirectoryNotFoundException(o.SourceHs2Root);
+            if (!Directory.Exists(o.Hs2Root))
+                throw new DirectoryNotFoundException(o.Hs2Root);
         }
         if (mode == PipelineMode.PreviewOnly || mode == PipelineMode.BuildOnly)
         {
@@ -38,7 +38,7 @@ private static string SanitizeWavFileName(string fileName)
         if (mode != PipelineMode.DeployOnly)
         {
             var pid = $"c{o.TargetPersonalityId:00}";
-            var pcm = Path.Combine(o.SourceHs2Root, "abdata", "sound", "data", "pcm", pid);
+            var pcm = Path.Combine(o.Hs2Root, "abdata", "sound", "data", "pcm", pid);
             if (!Directory.Exists(pcm))
                 throw new InvalidOperationException(L("error.personalitySourceMissing", pcm));
         }
@@ -78,12 +78,6 @@ private static string SanitizeWavFileName(string fileName)
                 throw new InvalidOperationException(L("error.dependencyFileMissing", r));
         }
 
-        if (mode == PipelineMode.DeployOnly || o.DeployToBackup)
-        {
-            var full = Path.GetFullPath(o.DeployHs2Root).ToLowerInvariant();
-            if (full == @"e:\gam\honeyselect2" || full.StartsWith(@"e:\gam\honeyselect2\"))
-                throw new InvalidOperationException(L("error.deployToProductionForbidden"));
-        }
     }
 
     private static void ValidateSingleOptions(PipelineOptions o, string sourceWav, string modelBucket)
@@ -134,8 +128,8 @@ private static string SanitizeWavFileName(string fileName)
             throw new InvalidOperationException(L("error.dependencyRootMissing"));
         if (!Directory.Exists(o.OutputBaseRoot))
             Directory.CreateDirectory(o.OutputBaseRoot);
-        if (!Directory.Exists(o.SourceHs2Root))
-            throw new DirectoryNotFoundException(o.SourceHs2Root);
+        if (!Directory.Exists(o.Hs2Root))
+            throw new DirectoryNotFoundException(o.Hs2Root);
 
         var runRootFull = Path.GetFullPath(runRoot);
         if (!Directory.Exists(runRootFull))
@@ -181,12 +175,6 @@ private static string SanitizeWavFileName(string fileName)
                 throw new InvalidOperationException(L("error.dependencyFileMissing", r));
         }
 
-        if (o.DeployToBackup)
-        {
-            var full = Path.GetFullPath(o.DeployHs2Root).ToLowerInvariant();
-            if (full == @"e:\gam\honeyselect2" || full.StartsWith(@"e:\gam\honeyselect2\"))
-                throw new InvalidOperationException(L("error.deployToProductionForbidden"));
-        }
     }
 }
 

@@ -155,7 +155,7 @@ internal static partial class VoiceReplacePipeline
         var sb = new StringBuilder();
         foreach (var target in targets.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
         {
-            var srcBundle = BuildSourceBundlePath(options.SourceHs2Root, pid, target);
+            var srcBundle = BuildSourceBundlePath(options.Hs2Root, pid, target);
             long len = 0;
             long ticks = 0;
             try

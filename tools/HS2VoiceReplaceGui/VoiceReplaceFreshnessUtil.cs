@@ -3,7 +3,17 @@
 // Provides pure freshness and pending-row decisions used by resumable conversion flows.
 internal static class VoiceReplaceFreshnessUtil
 {
-    internal readonly record struct SignatureMapRow(string RelativePath, string Bucket, string OutputFile, string SigNormal, string SigEro, string SigUsed);
+    internal readonly record struct SignatureMapRow(
+        string RelativePath,
+        string Bucket,
+        string OutputFile,
+        string SigNormal,
+        string SigEro,
+        string SigUsed,
+        string SampleNormalName = "",
+        string SampleEroName = "",
+        string SampleUsedName = "",
+        string SeedVcSummary = "");
     internal readonly record struct PendingReasonSummary(int MissingFileOnly, int SigMismatchOnly, int MissingAndSigMismatch);
 
     public static (List<(string RelativePath, string Bucket, string SourceFile)> PendingRows, PendingReasonSummary Summary) BuildPendingRows(

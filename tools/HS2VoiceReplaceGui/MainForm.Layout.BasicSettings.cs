@@ -32,7 +32,7 @@ public sealed partial class MainForm
         AddReadonlyRow(table, ref row, T("general.bundledRuntimeRoot"), _txtBundleRoot);
         AddPathRow(table, ref row, T("general.outputRoot"), _txtOutputRoot, false, PathMode.Folder);
         AddPathRow(table, ref row, T("general.externalToolsRoot"), _txtExternalToolsRoot, false, PathMode.Folder);
-        AddPathRow(table, ref row, T("general.hs2Root"), _txtSourceHs2Root, true, PathMode.Folder);
+        AddPathRow(table, ref row, T("general.hs2Root"), _txtHs2Root, true, PathMode.Folder);
         AddFieldLabel(table, ref row, T("general.uiLanguage"));
         var langPanel = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, WrapContents = false };
         var cmbLang = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 240 };

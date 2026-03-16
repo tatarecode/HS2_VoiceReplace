@@ -195,7 +195,7 @@ public sealed partial class MainForm
         try
         {
             var runRoot = GetCurrentRunRoot();
-            var options = BuildOptions(runRoot, deployToBackup: true, requireSamples: false);
+            var options = BuildOptions(runRoot, deployAfterBuild: true, requireSamples: false);
             var result = await _appService.RunDeployAsync(options, AppendLog, _cts.Token);
             _lastGridRunRoot = result.RunRoot;
             AppendLog(T("deploy.completed"));
@@ -285,7 +285,7 @@ public sealed partial class MainForm
             _btnSampleDialogCancel.Enabled = _isBusy;
     }
 
-    private PipelineOptions BuildOptions(string? runRootOverride = null, bool deployToBackup = false, bool requireSamples = true)
+    private PipelineOptions BuildOptions(string? runRootOverride = null, bool deployAfterBuild = false, bool requireSamples = true)
     {
         ApplyOutputRootChangeFromUi(reloadSampleAssets: false);
         string ResolveUserPath(string p) => Path.GetFullPath(Environment.ExpandEnvironmentVariables(p));
@@ -306,6 +306,12 @@ public sealed partial class MainForm
         var ero = string.IsNullOrWhiteSpace(eroPathRaw)
             ? normal
             : ResolveUserPath(eroPathRaw);
+        var normalDisplayName = normalAsset != null
+            ? normalAsset.Name
+            : (string.IsNullOrWhiteSpace(normalPathRaw) ? string.Empty : Path.GetFileNameWithoutExtension(normalPathRaw));
+        var eroDisplayName = eroAsset != null
+            ? eroAsset.Name
+            : (string.IsNullOrWhiteSpace(eroPathRaw) ? normalDisplayName : Path.GetFileNameWithoutExtension(eroPathRaw));
         var seed = _seedVc.Clone();
 
         return new PipelineOptions
@@ -313,14 +319,16 @@ public sealed partial class MainForm
             BundleRoot = _bundleRootFixed,
             ExternalToolsRoot = string.IsNullOrWhiteSpace(_txtExternalToolsRoot.Text) ? "" : ResolveUserPath(_txtExternalToolsRoot.Text.Trim()),
             OutputBaseRoot = _activeOutputRoot,
-            SourceHs2Root = ResolveOptionalUserPath(hs2Root),
-            DeployHs2Root = ResolveOptionalUserPath(hs2Root),
+            Hs2Root = ResolveOptionalUserPath(hs2Root),
             TargetPersonalityId = GetSelectedPersonalityId(),
             StyleNormalSample = normal,
             StyleEroSample = ero,
-            DeployToBackup = deployToBackup,
+            StyleNormalSampleDisplayName = normalDisplayName,
+            StyleEroSampleDisplayName = string.IsNullOrWhiteSpace(eroDisplayName) ? normalDisplayName : eroDisplayName,
+            DeployAfterBuild = deployAfterBuild,
             SkipCompletedProcesses = _chkSkipCompleted.Checked,
             SeedVc = seed,
+            SeedVcSummary = seed.ToSummaryString(),
             StyleNormalSegment = null,
             StyleEroSegment = null,
             ResumeRunRoot = string.IsNullOrWhiteSpace(runRootOverride) ? "" : Path.GetFullPath(runRootOverride.Trim()),
@@ -395,6 +403,36 @@ public sealed partial class MainForm
         }
     }
 
+    private bool HasCompleteConvertedOutputsForCurrentPersonality()
+    {
+        try
+        {
+            var runRoot = GetCurrentRunRoot();
+            var manifest = Path.Combine(runRoot, "rvc_batches", "routing_manifest.csv");
+            var outRoot = Path.Combine(runRoot, "voice_replace_wav");
+            if (!File.Exists(manifest) || !Directory.Exists(outRoot))
+                return false;
+
+            foreach (var row in File.ReadLines(manifest).Skip(1))
+            {
+                if (string.IsNullOrWhiteSpace(row))
+                    continue;
+                var cols = PartialRebuildGridDataUtil.ParseCsvLine(row);
+                if (cols.Count < 1 || string.IsNullOrWhiteSpace(cols[0]))
+                    continue;
+                var wav = Path.Combine(outRoot, cols[0].Replace('/', Path.DirectorySeparatorChar));
+                if (!File.Exists(wav))
+                    return false;
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private bool CanPreview()
         => Directory.Exists(GetConfiguredHs2Root()) && HasAssignedSampleAudio();
 
@@ -402,7 +440,9 @@ public sealed partial class MainForm
         => HasExtractedDataForCurrentPersonality() && HasAssignedSampleAudio();
 
     private bool CanDeploy()
-        => Directory.Exists(GetConfiguredHs2Root()) && HasDeployArtifactsForCurrentPersonality();
+        => Directory.Exists(GetConfiguredHs2Root()) &&
+           HasDeployArtifactsForCurrentPersonality() &&
+           HasCompleteConvertedOutputsForCurrentPersonality();
 
     private bool CanUndeploy()
         => Directory.Exists(GetConfiguredHs2Root()) && _appService.HasInstalledDeployArtifacts(GetConfiguredHs2Root(), GetSelectedPersonalityId());

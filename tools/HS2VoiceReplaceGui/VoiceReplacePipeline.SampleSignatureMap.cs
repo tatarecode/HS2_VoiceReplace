@@ -18,10 +18,13 @@ private static void WriteSampleSignatureFile(string runRoot, PipelineOptions o)
         var outFile = Path.Combine(runRoot, "sample_signature.csv");
         var lines = new List<string>
         {
-            "kind,sha256",
+            "kind,value",
             $"\"normal\",\"{normal}\"",
             $"\"ero\",\"{ero}\"",
             $"\"combined\",\"{combined}\"",
+            $"\"normal_name\",\"{EscapeCsvValue(o.StyleNormalSampleDisplayName)}\"",
+            $"\"ero_name\",\"{EscapeCsvValue(o.StyleEroSampleDisplayName)}\"",
+            $"\"seedvc_summary\",\"{EscapeCsvValue(o.SeedVcSummary)}\"",
         };
         File.WriteAllLines(outFile, lines, new UTF8Encoding(false));
     }
@@ -35,14 +38,14 @@ private static void WriteSampleSignatureFile(string runRoot, PipelineOptions o)
         if (File.Exists(outFile))
             return;
 
-        var lines = new List<string> { "relative_path,bucket,output_file,sig_normal,sig_ero,sig_used" };
+        var lines = new List<string> { "relative_path,bucket,output_file,sig_normal,sig_ero,sig_used,sample_normal_name,sample_ero_name,sample_used_name,seed_vc_summary" };
         foreach (var row in LoadManifestRows(manifestCsv).OrderBy(r => r.RelativePath, StringComparer.OrdinalIgnoreCase))
         {
             if (string.IsNullOrWhiteSpace(row.RelativePath))
                 continue;
             var bucket = string.Equals(row.Bucket, "ero", StringComparison.OrdinalIgnoreCase) ? "ero" : "normal";
             var outPath = Path.Combine(outWavRoot, row.RelativePath.Replace('/', Path.DirectorySeparatorChar));
-            lines.Add($"\"{row.RelativePath}\",\"{bucket}\",\"{outPath.Replace("\"", "\"\"")}\",\"\",\"\",\"\"");
+            lines.Add($"\"{row.RelativePath}\",\"{bucket}\",\"{outPath.Replace("\"", "\"\"")}\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"");
         }
         File.WriteAllLines(outFile, lines, new UTF8Encoding(false));
     }
@@ -65,7 +68,11 @@ private static void WriteSampleSignatureFile(string runRoot, PipelineOptions o)
                     continue;
                 var bucket = string.Equals(cols[1], "ero", StringComparison.OrdinalIgnoreCase) ? "ero" : "normal";
                 var outPath = cols[2];
-                map[rel] = new VoiceReplaceFreshnessUtil.SignatureMapRow(rel, bucket, outPath, cols[3], cols[4], cols[5]);
+                var sampleNormalName = cols.Count > 6 ? cols[6] : "";
+                var sampleEroName = cols.Count > 7 ? cols[7] : "";
+                var sampleUsedName = cols.Count > 8 ? cols[8] : "";
+                var seedVcSummary = cols.Count > 9 ? cols[9] : "";
+                map[rel] = new VoiceReplaceFreshnessUtil.SignatureMapRow(rel, bucket, outPath, cols[3], cols[4], cols[5], sampleNormalName, sampleEroName, sampleUsedName, seedVcSummary);
             }
         }
 
@@ -78,7 +85,7 @@ private static void WriteSampleSignatureFile(string runRoot, PipelineOptions o)
                 continue;
             var bucket = string.Equals(row.Bucket, "ero", StringComparison.OrdinalIgnoreCase) ? "ero" : "normal";
             var outPath = Path.Combine(outWavRoot, rel.Replace('/', Path.DirectorySeparatorChar));
-            map[rel] = new VoiceReplaceFreshnessUtil.SignatureMapRow(rel, bucket, outPath, "", "", "");
+            map[rel] = new VoiceReplaceFreshnessUtil.SignatureMapRow(rel, bucket, outPath, "", "", "", "", "", "", "");
         }
         return map;
     }
@@ -86,11 +93,11 @@ private static void WriteSampleSignatureFile(string runRoot, PipelineOptions o)
     private static void SaveSignatureMapRows(string runRoot, IReadOnlyDictionary<string, VoiceReplaceFreshnessUtil.SignatureMapRow> rows)
     {
         var mapFile = Path.Combine(runRoot, "sample_signature_map.csv");
-        var lines = new List<string> { "relative_path,bucket,output_file,sig_normal,sig_ero,sig_used" };
+        var lines = new List<string> { "relative_path,bucket,output_file,sig_normal,sig_ero,sig_used,sample_normal_name,sample_ero_name,sample_used_name,seed_vc_summary" };
         foreach (var row in rows.Values.OrderBy(x => x.RelativePath, StringComparer.OrdinalIgnoreCase))
         {
             lines.Add(
-                $"\"{row.RelativePath}\",\"{row.Bucket}\",\"{row.OutputFile.Replace("\"", "\"\"")}\",\"{row.SigNormal}\",\"{row.SigEro}\",\"{row.SigUsed}\"");
+                $"\"{row.RelativePath}\",\"{row.Bucket}\",\"{row.OutputFile.Replace("\"", "\"\"")}\",\"{row.SigNormal}\",\"{row.SigEro}\",\"{row.SigUsed}\",\"{EscapeCsvValue(row.SampleNormalName)}\",\"{EscapeCsvValue(row.SampleEroName)}\",\"{EscapeCsvValue(row.SampleUsedName)}\",\"{EscapeCsvValue(row.SeedVcSummary)}\"");
         }
         File.WriteAllLines(mapFile, lines, new UTF8Encoding(false));
     }
@@ -101,7 +108,10 @@ private static void WriteSampleSignatureFile(string runRoot, PipelineOptions o)
         string processedManifestCsv,
         string outWavRoot,
         string currentNormalSig,
-        string currentEroSig)
+        string currentEroSig,
+        string currentNormalName,
+        string currentEroName,
+        string seedVcSummary)
     {
         var map = LoadSignatureMapRows(runRoot, fullManifestCsv, outWavRoot);
         foreach (var row in LoadManifestRows(processedManifestCsv))
@@ -114,10 +124,14 @@ private static void WriteSampleSignatureFile(string runRoot, PipelineOptions o)
             if (!File.Exists(outPath))
                 continue;
             var used = bucket == "ero" ? currentEroSig : currentNormalSig;
-            map[rel] = new VoiceReplaceFreshnessUtil.SignatureMapRow(rel, bucket, outPath, currentNormalSig, currentEroSig, used);
+            var usedName = bucket == "ero" ? currentEroName : currentNormalName;
+            map[rel] = new VoiceReplaceFreshnessUtil.SignatureMapRow(rel, bucket, outPath, currentNormalSig, currentEroSig, used, currentNormalName, currentEroName, usedName, seedVcSummary);
         }
         SaveSignatureMapRows(runRoot, map);
     }
+
+    private static string EscapeCsvValue(string? value)
+        => (value ?? "").Replace("\"", "\"\"");
 }
 
 

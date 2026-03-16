@@ -79,7 +79,7 @@ internal static partial class VoiceReplacePipeline
             foreach (var t in targets)
             {
                 ct.ThrowIfCancellationRequested();
-                var srcBundle = BuildSourceBundlePath(o.SourceHs2Root, pid, t);
+                var srcBundle = BuildSourceBundlePath(o.Hs2Root, pid, t);
                 var wavDir = Path.Combine(paths.OutWavRoot, t.WavRel.Replace('/', Path.DirectorySeparatorChar));
                 if (!Directory.Exists(wavDir))
                     throw new InvalidOperationException(L("error.convertedWavDirectoryMissing", wavDir));
@@ -123,7 +123,7 @@ internal static partial class VoiceReplacePipeline
             log($"  reuse zipmods={zipmods.Count}");
         }
 
-        if (o.DeployToBackup)
+        if (o.DeployAfterBuild)
         {
             log(L("log.buildStep8Deploy"));
             Deploy(o, runtimeDll, zipmods, log);
@@ -279,7 +279,10 @@ internal static partial class VoiceReplacePipeline
             manifestForSeed,
             paths.OutWavRoot,
             sampleNormalCurrent,
-            sampleEroCurrent);
+            sampleEroCurrent,
+            o.StyleNormalSampleDisplayName,
+            o.StyleEroSampleDisplayName,
+            o.SeedVcSummary);
         File.WriteAllText(seedSigPath, seedSigCurrent, new UTF8Encoding(false));
         steps.MarkDone("05_seedvc");
         steps.ClearDone("06_rebuild", "07_split");

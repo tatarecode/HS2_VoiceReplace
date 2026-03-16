@@ -22,11 +22,11 @@ internal static partial class VoiceReplacePipeline
     public static void RunUndeploy(PipelineOptions o, Action<string> log, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
-        if (string.IsNullOrWhiteSpace(o.DeployHs2Root) || !Directory.Exists(o.DeployHs2Root))
-            throw new InvalidOperationException(L("error.deployTargetMissing", o.DeployHs2Root));
+        if (string.IsNullOrWhiteSpace(o.Hs2Root) || !Directory.Exists(o.Hs2Root))
+            throw new InvalidOperationException(L("error.hs2RootMissing", o.Hs2Root));
 
         log(L("log.undeployPersonality", o.TargetPersonalityId.ToString("00")));
-        Undeploy(o.DeployHs2Root, o.TargetPersonalityId, log);
+        Undeploy(o.Hs2Root, o.TargetPersonalityId, log);
     }
 
     public static async Task<string> RunSingleWavAsync(PipelineOptions o, string sourceWav, string modelBucket, Action<string> log, CancellationToken ct)
@@ -165,8 +165,21 @@ internal static partial class VoiceReplacePipeline
         if (!File.Exists(outWav))
             throw new InvalidOperationException(L("error.partialRebuildOutputMissing", outWav));
 
+        var currentNormalSig = ComputeTextSha256(BuildSampleInputSignature(o, isEro: false));
+        var currentEroSig = ComputeTextSha256(BuildSampleInputSignature(o, isEro: true));
+        UpdateSampleSignatureMapFromProcessedManifest(
+            runRootFull,
+            manifestPath,
+            singleManifest,
+            outWavRoot,
+            currentNormalSig,
+            currentEroSig,
+            o.StyleNormalSampleDisplayName,
+            o.StyleEroSampleDisplayName,
+            o.SeedVcSummary);
+
         var target = ResolveTargetFromRelativePath(resolved.RelativePath);
-        var srcBundle = BuildSourceBundlePath(o.SourceHs2Root, pid, target);
+        var srcBundle = BuildSourceBundlePath(o.Hs2Root, pid, target);
         var wavDir = Path.Combine(outWavRoot, target.WavRel.Replace('/', Path.DirectorySeparatorChar));
         var dstBundle = Path.Combine(replaceInputRoot, target.DstRel.Replace('/', Path.DirectorySeparatorChar));
         Directory.CreateDirectory(Path.GetDirectoryName(dstBundle)!);
@@ -180,7 +193,7 @@ internal static partial class VoiceReplacePipeline
         var rebuilt = BuildSplitZipmods(templateRoot, replaceInputRoot, splitOutRoot, pid, new[] { target.Key }, new[] { target });
         log($"partial split zipmod rebuilt: {string.Join(", ", rebuilt.Select(Path.GetFileName))}");
 
-        if (o.DeployToBackup)
+        if (o.DeployAfterBuild)
         {
             var allZipmods = Directory.GetFiles(splitOutRoot, $"HS2VoiceReplace_{pid}_*.zipmod", SearchOption.TopDirectoryOnly)
                 .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)

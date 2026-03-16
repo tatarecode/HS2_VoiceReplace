@@ -15,15 +15,32 @@ internal sealed class PartialRebuildGridRow
     public string ConvertedState => ConvertedExists ? "OK" : "NG";
     public string Status { get; set; } = "";
     public string VoiceLine { get; set; } = "";
+    public string SampleNameUsed { get; set; } = "";
+    public string SampleNameNormal { get; set; } = "";
+    public string SampleNameEro { get; set; } = "";
     public string SampleSignatureNormal { get; set; } = "";
     public string SampleSignatureEro { get; set; } = "";
     public string SampleSignatureUsed { get; set; } = "";
+    public string SeedVcSummary { get; set; } = "";
+    public string SeedVcSummaryStored { get; set; } = "";
 }
 
 internal sealed partial class PartialRebuildGridDialog
 {
-    private readonly record struct RunSampleSignatures(string Normal, string Ero);
-    private readonly record struct RowSampleSignature(string Normal, string Ero, string Used);
+    private readonly record struct RunSampleSignatures(
+        string Normal,
+        string Ero,
+        string NormalName = "",
+        string EroName = "",
+        string SeedVcSummary = "");
+    private readonly record struct RowSampleSignature(
+        string Normal,
+        string Ero,
+        string Used,
+        string NormalName = "",
+        string EroName = "",
+        string UsedName = "",
+        string SeedVcSummary = "");
 }
 
 

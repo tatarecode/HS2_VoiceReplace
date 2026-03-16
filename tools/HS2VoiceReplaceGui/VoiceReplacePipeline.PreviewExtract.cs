@@ -36,7 +36,7 @@ internal static partial class VoiceReplacePipeline
 
         log(L("log.previewExtractFsb"));
         ct.ThrowIfCancellationRequested();
-        var previewSrcBundle = BuildSourceBundlePath(o.SourceHs2Root, pid, previewTarget);
+        var previewSrcBundle = BuildSourceBundlePath(o.Hs2Root, pid, previewTarget);
         var previewFsbOutDir = Path.Combine(paths.PreviewExtractFsbRoot, previewTarget.WavRel.Replace('/', Path.DirectorySeparatorChar));
         Directory.CreateDirectory(previewFsbOutDir);
         var previewClipCount = AudioBundleExtractor.ExtractAudioPayloads(previewSrcBundle, classDataPath, previewFsbOutDir);
@@ -152,7 +152,7 @@ internal static partial class VoiceReplacePipeline
                     continue;
 
                 ct.ThrowIfCancellationRequested();
-                var srcBundle = BuildSourceBundlePath(o.SourceHs2Root, pid, t);
+                var srcBundle = BuildSourceBundlePath(o.Hs2Root, pid, t);
                 var outDir = Path.Combine(paths.ExtractFsbRoot, t.WavRel.Replace('/', Path.DirectorySeparatorChar));
                 Directory.CreateDirectory(outDir);
                 if (o.SkipCompletedProcesses && Directory.GetFiles(outDir, "*.fsb", SearchOption.TopDirectoryOnly).Length > 0)
@@ -213,7 +213,7 @@ internal static partial class VoiceReplacePipeline
         {
             log("export voice text assets into run-root");
             var exportedTextAssets = VoiceLineBundleExtractor.ExportVoiceLineTextAssets(
-                o.SourceHs2Root,
+                o.Hs2Root,
                 classDataPath,
                 paths.RunRoot);
             if (exportedTextAssets > 0)
@@ -224,7 +224,7 @@ internal static partial class VoiceReplacePipeline
         var textAssetFiles = VoiceLineMapUtil.EnumerateVoiceLineTextAssetFiles(paths.RunRoot);
         var voiceLineMap = VoiceLineMapUtil.BuildVoiceLineMapFromTextAssetFiles(textAssetFiles);
         var advVoiceLineMap = AdvScenarioVoiceLineExtractor.ExtractVoiceLineMap(
-            o.SourceHs2Root,
+            o.Hs2Root,
             classDataPath,
             pid);
         var supplemented = 0;

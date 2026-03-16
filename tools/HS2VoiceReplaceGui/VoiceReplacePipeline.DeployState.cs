@@ -11,13 +11,13 @@ internal static partial class VoiceReplacePipeline
 
 private static void Deploy(PipelineOptions o, string runtimeDll, IReadOnlyList<string> zipmods, Action<string> log)
     {
-        var modsDir = Path.Combine(o.DeployHs2Root, "mods");
-        var pluginDir = Path.Combine(o.DeployHs2Root, "BepInEx", "plugins");
+        var modsDir = Path.Combine(o.Hs2Root, "mods");
+        var pluginDir = Path.Combine(o.Hs2Root, "BepInEx", "plugins");
         var pid = $"c{o.TargetPersonalityId:00}";
         Directory.CreateDirectory(modsDir);
         Directory.CreateDirectory(pluginDir);
 
-        UndeployCore(o.DeployHs2Root, o.TargetPersonalityId, log, keepManifestBackup: false);
+        UndeployCore(o.Hs2Root, o.TargetPersonalityId, log, keepManifestBackup: false);
 
         var disabledZipmods = new List<string>();
         foreach (var f in Directory.GetFiles(modsDir, $"HS2VoiceReplace_{pid}_*.zipmod", SearchOption.TopDirectoryOnly))
@@ -53,7 +53,7 @@ private static void Deploy(PipelineOptions o, string runtimeDll, IReadOnlyList<s
             log($"  deployed: {fileName}");
         }
 
-        SaveDeployState(o.DeployHs2Root, o.TargetPersonalityId, new DeployStateManifest
+        SaveDeployState(o.Hs2Root, o.TargetPersonalityId, new DeployStateManifest
         {
             RuntimeDllFileName = RuntimePluginFileName,
             DeployedZipmods = deployedZipmods,

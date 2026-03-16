@@ -79,8 +79,6 @@ public sealed partial class MainForm
             {
                 Hs2Root = GetConfiguredHs2Root(),
                 ExternalToolsRoot = _txtExternalToolsRoot.Text.Trim(),
-                SourceHs2Root = GetConfiguredHs2Root(),
-                DeployHs2Root = GetConfiguredHs2Root(),
                 TargetPersonalityId = GetSelectedPersonalityId(),
                 NormalSample = _txtNormalSample.Text.Trim(),
                 EroSample = _txtEroSample.Text.Trim(),

@@ -16,12 +16,12 @@ internal sealed class PersistedUiSettings
 {
     public string? Hs2Root { get; set; }
     public string? ExternalToolsRoot { get; set; }
+    // Legacy fields kept only so older ui_settings.json files continue to load.
     public string? SourceHs2Root { get; set; }
     public string? DeployHs2Root { get; set; }
     public int? TargetPersonalityId { get; set; }
     public string? NormalSample { get; set; }
     public string? EroSample { get; set; }
-    public bool? DeployToBackup { get; set; }
     public bool? SkipCompleted { get; set; }
     public SeedVcUiSettings? SeedVc { get; set; }
     public StyleSegmentSelection? ManualNormalSegment { get; set; }

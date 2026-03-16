@@ -57,7 +57,7 @@ private static string BuildSourceBundlePath(string sourceHs2Root, string pid, Bu
     {
         var resolved = new List<BundleTarget>();
         foreach (var t in BuildTargets())
-            resolved.Add(ResolveSingleTarget(o.SourceHs2Root, pid, t, log));
+            resolved.Add(ResolveSingleTarget(o.Hs2Root, pid, t, log));
         return resolved;
     }
 

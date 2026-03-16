@@ -5,8 +5,20 @@ namespace HS2VoiceReplace;
 // Provides pure CSV/status helpers for the partial rebuild grid without requiring a live dialog instance.
 internal static class PartialRebuildGridDataUtil
 {
-    internal readonly record struct RunSampleSignatures(string Normal, string Ero);
-    internal readonly record struct RowSampleSignature(string Normal, string Ero, string Used);
+    internal readonly record struct RunSampleSignatures(
+        string Normal,
+        string Ero,
+        string NormalName = "",
+        string EroName = "",
+        string SeedVcSummary = "");
+    internal readonly record struct RowSampleSignature(
+        string Normal,
+        string Ero,
+        string Used,
+        string NormalName = "",
+        string EroName = "",
+        string UsedName = "",
+        string SeedVcSummary = "");
 
     public static string PreferNonEmpty(params string?[] values)
     {
@@ -41,7 +53,28 @@ internal static class PartialRebuildGridDataUtil
             fallbackUsed,
             previousSignatures?.Used);
 
-        return new RowSampleSignature(normal, ero, used);
+        var normalName = PreferNonEmpty(
+            mapSignatures?.NormalName,
+            runSignatures.NormalName,
+            previousSignatures?.NormalName);
+
+        var eroName = PreferNonEmpty(
+            mapSignatures?.EroName,
+            runSignatures.EroName,
+            previousSignatures?.EroName);
+
+        var fallbackUsedName = bucketNormalized == "ero" ? eroName : normalName;
+        var usedName = PreferNonEmpty(
+            mapSignatures?.UsedName,
+            fallbackUsedName,
+            previousSignatures?.UsedName);
+
+        var seedVcSummary = PreferNonEmpty(
+            mapSignatures?.SeedVcSummary,
+            runSignatures.SeedVcSummary,
+            previousSignatures?.SeedVcSummary);
+
+        return new RowSampleSignature(normal, ero, used, normalName, eroName, usedName, seedVcSummary);
     }
 
     public static List<string> ParseCsvLine(string line)
@@ -140,10 +173,40 @@ internal static class PartialRebuildGridDataUtil
         };
     }
 
+    public static string ResolveDisplayRawStatus(
+        string bucket,
+        string rawStatus,
+        bool convertedExists,
+        RowSampleSignature displayedSignatures)
+    {
+        var normalized = (rawStatus ?? "").Trim();
+        if (!string.IsNullOrWhiteSpace(normalized) || !convertedExists)
+            return normalized;
+
+        var expectedUsed = string.Equals(bucket, "ero", StringComparison.OrdinalIgnoreCase)
+            ? displayedSignatures.Ero
+            : displayedSignatures.Normal;
+
+        if (!string.IsNullOrWhiteSpace(displayedSignatures.Used) &&
+            !string.IsNullOrWhiteSpace(expectedUsed) &&
+            string.Equals(displayedSignatures.Used, expectedUsed, StringComparison.OrdinalIgnoreCase))
+        {
+            return "ok";
+        }
+
+        if (!string.IsNullOrWhiteSpace(expectedUsed))
+            return "pending";
+
+        return normalized;
+    }
+
     public static RunSampleSignatures ParseRunLevelSampleSignatures(IEnumerable<string> lines)
     {
         string n = "";
         string e = "";
+        string normalName = "";
+        string eroName = "";
+        string seedVcSummary = "";
         foreach (var line in lines.Skip(1))
         {
             if (string.IsNullOrWhiteSpace(line))
@@ -155,8 +218,11 @@ internal static class PartialRebuildGridDataUtil
             var sig = (cols[1] ?? "").Trim();
             if (kind == "normal") n = sig;
             if (kind == "ero") e = sig;
+            if (kind == "normal_name") normalName = sig;
+            if (kind == "ero_name") eroName = sig;
+            if (kind == "seedvc_summary") seedVcSummary = sig;
         }
-        return new RunSampleSignatures(n, e);
+        return new RunSampleSignatures(n, e, normalName, eroName, seedVcSummary);
     }
 
     public static Dictionary<string, RowSampleSignature> ParseSampleSignatureMap(IEnumerable<string> lines)
@@ -173,9 +239,13 @@ internal static class PartialRebuildGridDataUtil
             var sigN = cols[3];
             var sigE = cols[4];
             var sigU = cols[5];
+            var normalName = cols.Count > 6 ? cols[6] : "";
+            var eroName = cols.Count > 7 ? cols[7] : "";
+            var usedName = cols.Count > 8 ? cols[8] : "";
+            var seedVcSummary = cols.Count > 9 ? cols[9] : "";
             if (string.IsNullOrWhiteSpace(rel))
                 continue;
-            map[rel] = new RowSampleSignature(sigN, sigE, sigU);
+            map[rel] = new RowSampleSignature(sigN, sigE, sigU, normalName, eroName, usedName, seedVcSummary);
         }
         return map;
     }

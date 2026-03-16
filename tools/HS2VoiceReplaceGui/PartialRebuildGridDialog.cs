@@ -16,6 +16,10 @@ internal sealed partial class PartialRebuildGridDialog : Form
     private readonly Button _btnReload = new() { Text = UiTextCatalog.Get("button.reload"), Width = 110, Height = 36 };
     private readonly Button _btnRunFull = new() { Text = UiTextCatalog.Get("button.runAll"), Width = 140, Height = 36 };
     private readonly Button _btnStopFull = new() { Text = UiTextCatalog.Get("button.stop"), Width = 110, Height = 36, Enabled = false };
+    private readonly Button _btnPlaySelectedSrc = new() { Text = UiTextCatalog.Get("button.playSrc"), Width = 130, Height = 36, Enabled = false };
+    private readonly Button _btnPlaySelectedDst = new() { Text = UiTextCatalog.Get("button.playDst"), Width = 150, Height = 36, Enabled = false };
+    private readonly Button _btnRebuildSelected = new() { Text = UiTextCatalog.Get("button.rebuildRow"), Width = 160, Height = 36, Enabled = false };
+    private readonly Button _btnDiscardSelected = new() { Text = UiTextCatalog.Get("button.discardDst"), Width = 150, Height = 36, Enabled = false };
     private readonly Panel _gridPanel = new() { Dock = DockStyle.Fill };
     private readonly DataGridView _grid = new() { Dock = DockStyle.Fill, AllowUserToAddRows = false, AllowUserToDeleteRows = false, RowHeadersVisible = false };
     private readonly Label _lblEmptyState = new()

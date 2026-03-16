@@ -220,14 +220,13 @@ public sealed partial class MainForm
 
     private string GetConfiguredHs2Root()
     {
-        return Hs2RootSettingsUtil.FirstNonEmpty(_txtSourceHs2Root.Text, _txtDeployRoot.Text);
+        return Hs2RootSettingsUtil.FirstNonEmpty(_txtHs2Root.Text);
     }
 
     private void SetConfiguredHs2Root(string? path)
     {
         var normalized = Hs2RootSettingsUtil.FirstNonEmpty(path);
-        _txtSourceHs2Root.Text = normalized;
-        _txtDeployRoot.Text = normalized;
+        _txtHs2Root.Text = normalized;
     }
 
     private void PromptForHs2RootIfMissingOnStartup()

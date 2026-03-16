@@ -12,8 +12,10 @@ internal sealed partial class PartialRebuildGridDialog
             if (string.IsNullOrWhiteSpace(runRoot))
             {
                 _rows.Clear();
+                _grid.ClearSelection();
                 _lblStatus.Text = T("dialog.partialGrid.status.runRootRequired");
                 UpdateEmptyState(T("dialog.partialGrid.empty.extractFirst"), visible: true);
+                RefreshSelectionActionAvailability();
                 return;
             }
 
@@ -22,8 +24,10 @@ internal sealed partial class PartialRebuildGridDialog
             if (!File.Exists(manifest))
             {
                 _rows.Clear();
+                _grid.ClearSelection();
                 _lblStatus.Text = T("dialog.partialGrid.empty.extractFirst");
                 UpdateEmptyState(T("dialog.partialGrid.empty.extractFirst"), visible: true);
+                RefreshSelectionActionAvailability();
                 return;
             }
             var statusMap = LoadStatusMap(runFull);
@@ -51,17 +55,44 @@ internal sealed partial class PartialRebuildGridDialog
                 if (bucket != "ero") bucket = "normal";
                 var src = cols[2];
                 var dst = Path.Combine(outRoot, rel.Replace('/', Path.DirectorySeparatorChar));
+                var convertedExists = File.Exists(dst);
                 previousRows.TryGetValue(rel, out var previousRow);
                 sigMap.TryGetValue(rel, out var sigEntry);
                 var resolvedSignatures = PartialRebuildGridDataUtil.ResolveDisplayedRowSampleSignatures(
                     bucket,
-                    new PartialRebuildGridDataUtil.RunSampleSignatures(runSig.Normal, runSig.Ero),
+                    new PartialRebuildGridDataUtil.RunSampleSignatures(runSig.Normal, runSig.Ero, runSig.NormalName, runSig.EroName, runSig.SeedVcSummary),
                     sigMap.ContainsKey(rel)
-                        ? new PartialRebuildGridDataUtil.RowSampleSignature(sigEntry.Normal, sigEntry.Ero, sigEntry.Used)
+                        ? new PartialRebuildGridDataUtil.RowSampleSignature(sigEntry.Normal, sigEntry.Ero, sigEntry.Used, sigEntry.NormalName, sigEntry.EroName, sigEntry.UsedName, sigEntry.SeedVcSummary)
                         : null,
                     previousRow == null
                         ? null
-                        : new PartialRebuildGridDataUtil.RowSampleSignature(previousRow.SampleSignatureNormal, previousRow.SampleSignatureEro, previousRow.SampleSignatureUsed));
+                        : new PartialRebuildGridDataUtil.RowSampleSignature(
+                            previousRow.SampleSignatureNormal,
+                            previousRow.SampleSignatureEro,
+                            previousRow.SampleSignatureUsed,
+                            previousRow.SampleNameNormal,
+                            previousRow.SampleNameEro,
+                            previousRow.SampleNameUsed,
+                            previousRow.SeedVcSummaryStored));
+
+                var displayUsedSampleName = convertedExists
+                    ? PartialRebuildGridDataUtil.PreferNonEmpty(
+                        sigEntry.UsedName,
+                        resolvedSignatures.UsedName,
+                        previousRow?.SampleNameUsed)
+                    : "";
+                var displayUsedSignature = convertedExists
+                    ? PartialRebuildGridDataUtil.PreferNonEmpty(
+                        sigEntry.Used,
+                        resolvedSignatures.Used,
+                        previousRow?.SampleSignatureUsed)
+                    : "";
+                var displaySeedVcSummary = convertedExists
+                    ? PartialRebuildGridDataUtil.PreferNonEmpty(
+                        sigEntry.SeedVcSummary,
+                        resolvedSignatures.SeedVcSummary,
+                        previousRow?.SeedVcSummary)
+                    : "";
 
                 var item = new PartialRebuildGridRow
                 {
@@ -71,14 +102,25 @@ internal sealed partial class PartialRebuildGridDialog
                     SourceFile = src,
                     ConvertedFile = dst,
                     SourceExists = File.Exists(src),
-                    ConvertedExists = File.Exists(dst),
-                    Status = BuildDisplayStatus(statusMap.TryGetValue(rel, out var st) ? st : "", File.Exists(dst)),
+                    ConvertedExists = convertedExists,
+                    Status = BuildDisplayStatus(
+                        PartialRebuildGridDataUtil.ResolveDisplayRawStatus(
+                            bucket,
+                            statusMap.TryGetValue(rel, out var st) ? st : "",
+                            convertedExists,
+                            resolvedSignatures),
+                        convertedExists),
                     VoiceLine = PartialRebuildGridDataUtil.PreferNonEmpty(
                         voiceLineMap.TryGetValue(rel, out var lineText) ? lineText : "",
                         previousRow?.VoiceLine),
+                    SampleNameNormal = resolvedSignatures.NormalName,
+                    SampleNameEro = resolvedSignatures.EroName,
+                    SampleNameUsed = displayUsedSampleName,
                     SampleSignatureNormal = resolvedSignatures.Normal,
                     SampleSignatureEro = resolvedSignatures.Ero,
-                    SampleSignatureUsed = resolvedSignatures.Used
+                    SampleSignatureUsed = displayUsedSignature,
+                    SeedVcSummary = displaySeedVcSummary,
+                    SeedVcSummaryStored = resolvedSignatures.SeedVcSummary
                 };
                 _rows.Add(item);
                 _rowByRel[rel] = item;
@@ -98,13 +140,17 @@ internal sealed partial class PartialRebuildGridDialog
             UpdateEmptyState(
                 loaded > 0 ? string.Empty : T("dialog.partialGrid.empty.noRows"),
                 visible: loaded == 0);
+            _grid.ClearSelection();
+            RefreshSelectionActionAvailability();
             _onLog($"grid reload: run_root={runFull}, rows={loaded}");
         }
         catch (Exception ex)
         {
             _rows.Clear();
+            _grid.ClearSelection();
             _lblStatus.Text = T("dialog.partialGrid.status.errorWithMessage", ex.Message);
             UpdateEmptyState(T("dialog.partialGrid.empty.extractFirst"), visible: true);
+            RefreshSelectionActionAvailability();
         }
     }
 
@@ -278,7 +324,7 @@ internal sealed partial class PartialRebuildGridDialog
         try
         {
             var parsed = PartialRebuildGridDataUtil.ParseRunLevelSampleSignatures(File.ReadLines(p));
-            return new RunSampleSignatures(parsed.Normal, parsed.Ero);
+            return new RunSampleSignatures(parsed.Normal, parsed.Ero, parsed.NormalName, parsed.EroName, parsed.SeedVcSummary);
         }
         catch (Exception ex)
         {
@@ -296,7 +342,14 @@ internal sealed partial class PartialRebuildGridDialog
         try
         {
             foreach (var entry in PartialRebuildGridDataUtil.ParseSampleSignatureMap(File.ReadLines(p)))
-                map[entry.Key] = new RowSampleSignature(entry.Value.Normal, entry.Value.Ero, entry.Value.Used);
+                map[entry.Key] = new RowSampleSignature(
+                    entry.Value.Normal,
+                    entry.Value.Ero,
+                    entry.Value.Used,
+                    entry.Value.NormalName,
+                    entry.Value.EroName,
+                    entry.Value.UsedName,
+                    entry.Value.SeedVcSummary);
         }
         catch (Exception ex)
         {
@@ -312,11 +365,11 @@ internal sealed partial class PartialRebuildGridDialog
             // Store per-row signatures so "run all" can skip rows whose source sample and role
             // assignment have not changed since the previous conversion.
             var p = Path.Combine(runRoot, "sample_signature_map.csv");
-            var lines = new List<string> { "relative_path,bucket,output_file,sig_normal,sig_ero,sig_used" };
+            var lines = new List<string> { "relative_path,bucket,output_file,sig_normal,sig_ero,sig_used,sample_normal_name,sample_ero_name,sample_used_name,seed_vc_summary" };
             foreach (var r in _rows.Where(x => string.Equals(x.RunRoot, runRoot, StringComparison.OrdinalIgnoreCase)))
             {
                 lines.Add(
-                    $"\"{r.RelativePath}\",\"{r.Bucket}\",\"{r.ConvertedFile.Replace("\"", "\"\"")}\",\"{r.SampleSignatureNormal}\",\"{r.SampleSignatureEro}\",\"{r.SampleSignatureUsed}\"");
+                    $"\"{r.RelativePath}\",\"{r.Bucket}\",\"{r.ConvertedFile.Replace("\"", "\"\"")}\",\"{r.SampleSignatureNormal}\",\"{r.SampleSignatureEro}\",\"{r.SampleSignatureUsed}\",\"\",\"\",\"{EscapeCsvValue(r.SampleNameUsed)}\",\"{EscapeCsvValue(r.SeedVcSummary)}\"");
             }
             File.WriteAllLines(p, lines, new UTF8Encoding(false));
         }
@@ -325,6 +378,9 @@ internal sealed partial class PartialRebuildGridDialog
             _onLog("save sample signature map failed: " + ex.Message);
         }
     }
+
+    private static string EscapeCsvValue(string? value)
+        => (value ?? "").Replace("\"", "\"\"");
 
 }
 
