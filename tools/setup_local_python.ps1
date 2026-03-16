@@ -24,7 +24,7 @@ function Get-RuntimeManifest {
     $manifestPath = Join-Path $repoRoot "tools\python_runtime_manifest.json"
     if (Test-Path $manifestPath) {
         $loaded = Get-Content $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
-        foreach ($name in $defaults.Keys) {
+        foreach ($name in @($defaults.Keys)) {
             if ($null -ne $loaded.$name -and @($loaded.$name).Count -gt 0) {
                 $defaults[$name] = $loaded.$name
             }
