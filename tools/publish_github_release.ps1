@@ -80,6 +80,10 @@ function Resolve-GitHubRepository {
 }
 
 function Get-GitHubToken {
+    param(
+        [string]$RepositoryName = ""
+    )
+
     foreach ($name in @("GITHUB_TOKEN", "GH_TOKEN")) {
         $value = [Environment]::GetEnvironmentVariable($name)
         if (-not [string]::IsNullOrWhiteSpace($value)) {
@@ -87,7 +91,178 @@ function Get-GitHubToken {
         }
     }
 
+    $credentialToken = Get-GitCredentialToken -RepositoryName $RepositoryName
+    if (-not [string]::IsNullOrWhiteSpace($credentialToken)) {
+        return $credentialToken
+    }
+
     throw "Set GITHUB_TOKEN or GH_TOKEN before publishing a GitHub release."
+}
+
+function Invoke-CredentialCommand {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Command,
+        [Parameter(Mandatory = $true)]
+        [string[]]$InputLines
+    )
+
+    $psi = [System.Diagnostics.ProcessStartInfo]::new()
+    $psi.FileName = "git"
+    $psi.Arguments = $Command
+    $psi.WorkingDirectory = $repoRoot
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardInput = $true
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.CreateNoWindow = $true
+
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $psi
+
+    try {
+        [void]$process.Start()
+        foreach ($line in $InputLines) {
+            $process.StandardInput.WriteLine($line)
+        }
+        $process.StandardInput.WriteLine("")
+        $process.StandardInput.Close()
+
+        $stdout = $process.StandardOutput.ReadToEnd()
+        $stderr = $process.StandardError.ReadToEnd()
+        $process.WaitForExit()
+
+        if ($process.ExitCode -ne 0) {
+            return $null
+        }
+
+        return $stdout
+    }
+    catch {
+        return $null
+    }
+    finally {
+        $process.Dispose()
+    }
+}
+
+function Get-GitCredentialToken {
+    param(
+        [string]$RepositoryName = ""
+    )
+
+    $queries = New-Object System.Collections.Generic.List[object]
+    $owner = ""
+    if (-not [string]::IsNullOrWhiteSpace($RepositoryName)) {
+        $parts = $RepositoryName.Split('/', 2)
+        if ($parts.Length -ge 1) {
+            $owner = $parts[0].Trim()
+        }
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($owner)) {
+        $queries.Add(@("protocol=https", "host=github.com", "username=$owner"))
+    }
+    $queries.Add(@("protocol=https", "host=github.com"))
+
+    foreach ($query in $queries) {
+        $stdout = Invoke-CredentialCommand -Command "credential fill" -InputLines $query
+        if ([string]::IsNullOrWhiteSpace($stdout)) {
+            continue
+        }
+
+        foreach ($line in ($stdout -split "`r?`n")) {
+            if ($line -like "password=*") {
+                $token = $line.Substring("password=".Length).Trim()
+                if (-not [string]::IsNullOrWhiteSpace($token)) {
+                    return $token
+                }
+            }
+        }
+    }
+
+    $gcmExe = Get-GitCredentialManagerExecutable
+    if (-not [string]::IsNullOrWhiteSpace($gcmExe)) {
+        foreach ($query in $queries) {
+            $stdout = Invoke-CredentialManagerCommand -ExecutablePath $gcmExe -InputLines $query
+            if ([string]::IsNullOrWhiteSpace($stdout)) {
+                continue
+            }
+
+            foreach ($line in ($stdout -split "`r?`n")) {
+                if ($line -like "password=*") {
+                    $token = $line.Substring("password=".Length).Trim()
+                    if (-not [string]::IsNullOrWhiteSpace($token)) {
+                        return $token
+                    }
+                }
+            }
+        }
+    }
+
+    return $null
+}
+
+function Get-GitCredentialManagerExecutable {
+    $candidates = @(
+        "C:\Program Files\Git\mingw64\bin\git-credential-manager.exe",
+        "C:\Program Files\Git\mingw64\libexec\git-core\git-credential-manager.exe"
+    )
+
+    foreach ($candidate in $candidates) {
+        if (Test-Path $candidate) {
+            return $candidate
+        }
+    }
+
+    return $null
+}
+
+function Invoke-CredentialManagerCommand {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ExecutablePath,
+        [Parameter(Mandatory = $true)]
+        [string[]]$InputLines
+    )
+
+    $psi = [System.Diagnostics.ProcessStartInfo]::new()
+    $psi.FileName = $ExecutablePath
+    $psi.Arguments = "get"
+    $psi.WorkingDirectory = $repoRoot
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardInput = $true
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.CreateNoWindow = $true
+
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $psi
+
+    try {
+        [void]$process.Start()
+        foreach ($line in $InputLines) {
+            $process.StandardInput.WriteLine($line)
+        }
+        $process.StandardInput.WriteLine("")
+        $process.StandardInput.Close()
+
+        $stdout = $process.StandardOutput.ReadToEnd()
+        $null = $process.StandardError.ReadToEnd()
+        $process.WaitForExit()
+
+        if ($process.ExitCode -ne 0) {
+            return $null
+        }
+
+        return $stdout
+    }
+    catch {
+        return $null
+    }
+    finally {
+        $process.Dispose()
+    }
 }
 
 function Invoke-GitHubJsonApi {
@@ -224,7 +399,7 @@ if ($DryRun) {
     exit 0
 }
 
-$token = Get-GitHubToken
+$token = Get-GitHubToken -RepositoryName $resolvedRepository
 $currentCommit = (& git rev-parse HEAD).Trim()
 $notesBody = $null
 if (-not [string]::IsNullOrWhiteSpace($NotesFile)) {
