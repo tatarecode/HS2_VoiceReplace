@@ -34,9 +34,11 @@ Download the packaged zip from GitHub Releases and start from `HS2VoiceReplaceGu
 
 1. Launch `HS2VoiceReplaceGui.exe`
 2. Select the HS2 folder and the target personality
-3. Provide reference voice clips and run dependency setup if needed
-4. Run extraction, preview, and full conversion
-5. Deploy the generated files from the GUI, or place them manually:
+3. Run dependency setup
+4. Run extraction
+5. Add reference voice clips
+6. Run preview generation and full conversion
+7. Deploy the generated files from the GUI, or place them manually:
    - `HS2_VoiceReplace.dll` under `BepInEx\plugins`
    - `HS2VoiceReplace_cXX_*.zipmod` under `mods`
 
@@ -45,6 +47,12 @@ Example screen after extraction and conversion:
 ![HS2VoiceReplaceGui conversion grid](docs/images/gui-conversion-grid-en.png)
 
 ## Seed-VC Settings
+
+Recommended starting point:
+
+- `v1`
+- `DiffusionSteps = 50`
+- Keep the other optional switches `False`
 
 - `v1`
   - Closer to the original line feel
@@ -70,9 +78,6 @@ Common settings:
 
 - Generated working data defaults to a repository-local `.hs2voicereplace` folder when running from this repository
 - The working-data root can be changed from the GUI basic settings dialog
-- The runtime side is intentionally small, and the main orchestration stays in the GUI
-- GitHub Actions artifacts provide `HS2VoiceReplaceGui.exe/.dll` and `UabAudioClipPatcher.exe/.dll`
-- `HS2_VoiceReplace.dll` is built locally because it depends on a valid HS2 `GameRoot`
 
 ## For Developers
 

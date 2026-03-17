@@ -32,9 +32,11 @@ GitHub Releases から配布 zip をダウンロードし、`HS2VoiceReplaceGui.
 
 1. `HS2VoiceReplaceGui.exe` を起動する
 2. `HS2フォルダ` と対象性格を選ぶ
-3. お手本音声を追加し、必要なら依存セットアップを実行する
-4. `データ抽出`、`試聴生成`、`全量変換` を進める
-5. GUI から配備するか、生成物を手動配置する
+3. 依存セットアップを実行する
+4. `データ抽出` を実行する
+5. お手本音声を追加する
+6. `試聴生成` と `全量変換` を進める
+7. GUI から配備するか、生成物を手動配置する
    - `HS2_VoiceReplace.dll` は `BepInEx\plugins`
    - `HS2VoiceReplace_cXX_*.zipmod` は `mods`
 
@@ -43,6 +45,12 @@ GitHub Releases から配布 zip をダウンロードし、`HS2VoiceReplaceGui.
 ![HS2VoiceReplaceGui 変換一覧画面](docs/images/gui-conversion-grid-en.png)
 
 ## Seed-VC 設定
+
+おすすめの出発点:
+
+- `v1`
+- `DiffusionSteps = 50`
+- それ以外の切り替え項目は `False` のまま始める
 
 - `v1`
   - 元のしゃべり方に寄りやすい
@@ -67,9 +75,6 @@ GitHub Releases から配布 zip をダウンロードし、`HS2VoiceReplaceGui.
 
 - このリポジトリから直接実行した場合、作業データの既定保存先はリポジトリ内の `.hs2voicereplace` です
 - 作業データの保存先は GUI の基本設定から変更できます
-- runtime 側は小さく保ち、主な処理は GUI 側に寄せています
-- GitHub Actions の成果物では `HS2VoiceReplaceGui.exe/.dll` と `UabAudioClipPatcher.exe/.dll` を確認できます
-- `HS2_VoiceReplace.dll` は有効な HS2 `GameRoot` が必要なため、ローカル環境でビルドします
 
 ## 開発情報
 
