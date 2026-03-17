@@ -40,6 +40,10 @@ Download the packaged zip from GitHub Releases and start from `HS2VoiceReplaceGu
    - `HS2_VoiceReplace.dll` under `BepInEx\plugins`
    - `HS2VoiceReplace_cXX_*.zipmod` under `mods`
 
+Example screen after extraction and conversion:
+
+![HS2VoiceReplaceGui conversion grid](docs/images/gui-conversion-grid-en.png)
+
 ## Seed-VC Settings
 
 - `v1`
@@ -75,11 +79,11 @@ Common settings:
 Development-only information is kept out of this README.
 
 - source layout and build prerequisites:
-  - `DEVELOPMENT.md`
-  - `DEVELOPMENT_JA.md`
+  - `docs/DEVELOPMENT.md`
+  - `docs/DEVELOPMENT_JA.md`
 - automated tests:
-  - `TESTING.md`
-  - `TESTING_JA.md`
+  - `docs/TESTING.md`
+  - `docs/TESTING_JA.md`
 - tool-specific development notes:
   - `tools/HS2VoiceReplaceGui/README.md`
   - `tools/HS2VoiceReplaceGui/README_JA.md`

@@ -38,6 +38,10 @@ GitHub Releases から配布 zip をダウンロードし、`HS2VoiceReplaceGui.
    - `HS2_VoiceReplace.dll` は `BepInEx\plugins`
    - `HS2VoiceReplace_cXX_*.zipmod` は `mods`
 
+画面例:
+
+![HS2VoiceReplaceGui 変換一覧画面](docs/images/gui-conversion-grid-en.png)
+
 ## Seed-VC 設定
 
 - `v1`
@@ -72,11 +76,11 @@ GitHub Releases から配布 zip をダウンロードし、`HS2VoiceReplaceGui.
 開発向けの情報はこの README には入れていません。
 
 - 構成とビルド前提
-  - `DEVELOPMENT.md`
-  - `DEVELOPMENT_JA.md`
+  - `docs/DEVELOPMENT.md`
+  - `docs/DEVELOPMENT_JA.md`
 - 自動テスト
-  - `TESTING.md`
-  - `TESTING_JA.md`
+  - `docs/TESTING.md`
+  - `docs/TESTING_JA.md`
 - ツール別メモ
   - `tools/HS2VoiceReplaceGui/README.md`
   - `tools/HS2VoiceReplaceGui/README_JA.md`
