@@ -86,6 +86,8 @@ GitHub Releases から配布 zip をダウンロードし、`HS2VoiceReplaceGui.
 - 自動テスト
   - `docs/TESTING.md`
   - `docs/TESTING_JA.md`
+- 保守運用メモ
+  - `docs/MAINTAINER.md`
 - ツール別メモ
   - `tools/HS2VoiceReplaceGui/README.md`
   - `tools/HS2VoiceReplaceGui/README_JA.md`

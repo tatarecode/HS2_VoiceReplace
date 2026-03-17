@@ -89,6 +89,8 @@ Development-only information is kept out of this README.
 - automated tests:
   - `docs/TESTING.md`
   - `docs/TESTING_JA.md`
+- maintainer operations:
+  - `docs/MAINTAINER.md`
 - tool-specific development notes:
   - `tools/HS2VoiceReplaceGui/README.md`
   - `tools/HS2VoiceReplaceGui/README_JA.md`

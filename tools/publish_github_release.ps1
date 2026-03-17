@@ -32,6 +32,30 @@ function Invoke-CheckedCommand {
     }
 }
 
+function Ensure-GitTagAtCommit {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$ResolvedTag,
+        [Parameter(Mandatory = $true)]
+        [string]$CurrentCommit
+    )
+
+    $currentTagCommit = $null
+    try {
+        $currentTagCommit = (& git rev-parse $ResolvedTag 2>$null).Trim()
+    }
+    catch {
+        $currentTagCommit = $null
+    }
+
+    if ([string]::Equals($currentTagCommit, $CurrentCommit, [System.StringComparison]::OrdinalIgnoreCase)) {
+        return
+    }
+
+    Invoke-CheckedCommand -FilePath "git" -ArgumentList @("tag", "-f", $ResolvedTag, $CurrentCommit)
+    Invoke-CheckedCommand -FilePath "git" -ArgumentList @("push", "origin", "refs/tags/$ResolvedTag", "--force")
+}
+
 function Get-DefaultTag {
     $manifestPath = Join-Path $repoRoot "mods_src\HS2VoiceReplaceRuntimeTemplate\manifest.xml"
     if (Test-Path $manifestPath) {
@@ -401,6 +425,7 @@ if ($DryRun) {
 
 $token = Get-GitHubToken -RepositoryName $resolvedRepository
 $currentCommit = (& git rev-parse HEAD).Trim()
+Ensure-GitTagAtCommit -ResolvedTag $resolvedTag -CurrentCommit $currentCommit
 $notesBody = $null
 if (-not [string]::IsNullOrWhiteSpace($NotesFile)) {
     $notesBody = Get-Content $NotesFile -Raw -Encoding UTF8
@@ -434,6 +459,7 @@ else {
         name = $resolvedTitle
         draft = [bool]$Draft
         prerelease = [bool]$Prerelease
+        target_commitish = $currentCommit
     }
 
     if (-not [string]::IsNullOrWhiteSpace($notesBody)) {
