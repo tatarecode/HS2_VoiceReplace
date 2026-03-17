@@ -42,3 +42,24 @@ Local packaging is required whenever the release should include a new `HS2_Voice
 - Keep `README.md`, `README_JA.md`, `LICENSE`, and `SECURITY.md` in sync with the actual workflow
 - Prefer small, test-backed commits for GUI workflow changes
 - Do not commit generated working data, dependency-install outputs, or machine-local paths
+
+## UX Intent
+
+- Keep the main workflow easy to follow:
+  - dependency setup
+  - extraction
+  - sample audio selection
+  - preview
+  - full conversion
+  - deploy
+- Prefer plain task-oriented labels over developer-oriented terminology
+- Keep destructive or irreversible actions visually separated from routine actions
+- Prefer table views for inspection, and keep action buttons outside the table when possible
+- Let enabled and disabled states explain what the user can do at the current moment
+- Preserve in-progress context across restarts where practical:
+  - selected run root
+  - voice lines
+  - signatures
+  - column widths
+- Favor layouts where important buttons are visible without guesswork; use internal scrolling when a dialog cannot reliably fit on screen
+- Keep README text, UI wording, and actual behavior aligned whenever the workflow changes
