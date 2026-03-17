@@ -17,7 +17,7 @@ Japanese documentation is available in `README_JA.md`.
 - Windows environment that can run `HS2VoiceReplaceGui.exe`
 - `.NET 8 Desktop Runtime`
 - A Honey Select 2 installation that uses `mods` and `BepInEx\plugins`
-- Reference voice clips for the voice you want to imitate
+- Short reference voice clips for the voice you want to imitate, around 1 to 30 seconds
 
 The GUI can set up most conversion-side dependencies as part of its workflow.
 
