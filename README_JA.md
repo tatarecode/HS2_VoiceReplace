@@ -1,12 +1,12 @@
 # HS2VoiceReplace
 
-HS2VoiceReplace は、Honey Select 2 の既存ボイスを差し替える package を作成し、配備するための Windows GUI ツールです。
+HS2VoiceReplace は、Honey Select 2 の既存ボイスを差し替えるデータ一式を作成し、配備するための Windows GUI ツールです。
 
-元のゲーム音声を抽出し、用意したお手本音声へ Seed-VC で寄せて変換し、ゲームで使える形へ組み直して zipmod と runtime DLL を出力します。
+元のゲーム音声を抽出し、用意したお手本音声へ Seed-VC で寄せて変換し、ゲームで使える形へ組み直して zipmod と実行用 DLL を出力します。
 
 対象は `クール` や `ヤンデレ` のような既存性格です。新しい性格枠を追加するのではなく、既存性格向けの差し替えデータを作ります。
 
-生成物は base game のファイルを直接書き換えず、`mods` と `BepInEx\plugins` を使って扱う前提です。GUI から性格ごとの配備と配備解除ができます。
+生成物はゲーム本体のファイルを直接書き換えず、`mods` と `BepInEx\plugins` を使って扱う前提です。GUI から性格ごとの配備と配備解除ができます。
 
 英語版は `README.md` を参照してください。
 
@@ -24,9 +24,9 @@ HS2VoiceReplace は、Honey Select 2 の既存ボイスを差し替える packag
 GitHub Releases から配布 zip をダウンロードし、`HS2VoiceReplaceGui.exe` から始めます。
 
 - `HS2VoiceReplaceGui.exe`
-  - ワークフロー全体をまとめるメイン GUI
+  - ワークフロー全体をまとめるメイン画面
 - 生成される `HS2_VoiceReplace.dll`
-  - 配備した差し替え package が使う runtime DLL
+  - 配備した差し替えデータが使う実行用 DLL
 - 生成される `HS2VoiceReplace_cXX_*.zipmod`
   - 性格ごとに作られる zipmod
 
@@ -61,10 +61,10 @@ GitHub Releases から配布 zip をダウンロードし、`HS2VoiceReplaceGui.
 
 ## 補足
 
-- このリポジトリから直接実行した場合、作業データの既定保存先は repo-local の `.hs2voicereplace` です
+- このリポジトリから直接実行した場合、作業データの既定保存先はリポジトリ内の `.hs2voicereplace` です
 - 作業データの保存先は GUI の基本設定から変更できます
 - runtime 側は小さく保ち、主な処理は GUI 側に寄せています
-- GitHub Actions の artifact では `HS2VoiceReplaceGui.exe/.dll` と `UabAudioClipPatcher.exe/.dll` を確認できます
+- GitHub Actions の成果物では `HS2VoiceReplaceGui.exe/.dll` と `UabAudioClipPatcher.exe/.dll` を確認できます
 - `HS2_VoiceReplace.dll` は有効な HS2 `GameRoot` が必要なため、ローカル環境でビルドします
 
 ## 開発情報
