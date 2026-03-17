@@ -21,7 +21,7 @@ public sealed class VoiceReplaceSignatureUtilTests
                 "\n",
                 "seedvc_signature",
                 "style_signature_v2",
-                @"adv/test.wav|normal|C:\tmp\src.wav|123"),
+                @"adv/test.wav|normal|size=1234"),
             normalized);
     }
 
@@ -87,6 +87,41 @@ public sealed class VoiceReplaceSignatureUtilTests
             Assert.NotEqual(noSeg, withSeg);
             Assert.Contains("normalSeg=", withSeg);
             Assert.Contains("1.5", withSeg);
+        }
+        finally
+        {
+            tempRoot.Delete(true);
+        }
+    }
+
+    [Fact]
+    public void BuildSeedVcSignature_DoesNotDependOnAbsoluteSourcePath()
+    {
+        var tempRoot = Directory.CreateTempSubdirectory("hs2vr_seed_path_");
+        try
+        {
+            var srcRootA = Path.Combine(tempRoot.FullName, "a");
+            var srcRootB = Path.Combine(tempRoot.FullName, "b");
+            Directory.CreateDirectory(srcRootA);
+            Directory.CreateDirectory(srcRootB);
+
+            var srcA = Path.Combine(srcRootA, "source.wav");
+            var srcB = Path.Combine(srcRootB, "source.wav");
+            File.WriteAllText(srcA, "same content");
+            File.WriteAllText(srcB, "same content");
+
+            var options = new PipelineOptions
+            {
+                StyleNormalSample = srcA,
+                StyleEroSample = srcA,
+            };
+            var rowsA = new[] { ("adv/test.wav", "normal", srcA) };
+            var rowsB = new[] { ("adv/test.wav", "normal", srcB) };
+
+            var sigA = VoiceReplaceSignatureUtil.BuildSeedVcSignature(options, rowsA, "style_sig");
+            var sigB = VoiceReplaceSignatureUtil.BuildSeedVcSignature(options, rowsB, "style_sig");
+
+            Assert.Equal(sigA, sigB);
         }
         finally
         {

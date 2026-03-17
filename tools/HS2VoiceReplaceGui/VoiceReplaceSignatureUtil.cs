@@ -72,13 +72,22 @@ internal static class VoiceReplaceSignatureUtil
             }
 
             var parts = line.Split('|');
-            if (parts.Length >= 5 &&
+            if (parts.Length >= 4 &&
                 (string.Equals(parts[1], "normal", StringComparison.OrdinalIgnoreCase) ||
-                 string.Equals(parts[1], "ero", StringComparison.OrdinalIgnoreCase)) &&
-                long.TryParse(parts[^1], System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out _))
+                 string.Equals(parts[1], "ero", StringComparison.OrdinalIgnoreCase)))
             {
-                normalized.Add(string.Join("|", parts.Take(parts.Length - 1)));
-                continue;
+                var last = parts[^1];
+                if (long.TryParse(last, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var length))
+                {
+                    normalized.Add($"{parts[0]}|{parts[1]}|size={length}");
+                    continue;
+                }
+
+                if (parts.Length >= 3 && last.StartsWith("size=", StringComparison.OrdinalIgnoreCase))
+                {
+                    normalized.Add($"{parts[0]}|{parts[1]}|{last.ToLowerInvariant()}");
+                    continue;
+                }
             }
 
             normalized.Add(line);
@@ -95,18 +104,18 @@ internal static class VoiceReplaceSignatureUtil
             {
                 var full = Path.GetFullPath(p);
                 if (!File.Exists(full))
-                    return $"missing:{full}";
+                    return "missing";
                 var fi = new FileInfo(full);
-                return $"{full}|{fi.Length}";
+                return $"size={fi.Length}";
             }
             catch
             {
-                return $"invalid:{p}";
+                return "invalid";
             }
         }
 
         var sb = new StringBuilder();
-        sb.AppendLine("seedvc_signature_v3");
+        sb.AppendLine("seedvc_signature_v4");
         sb.AppendLine(styleSigCurrent);
         sb.AppendLine($"engine={o.SeedVc.Engine}");
         sb.AppendLine($"seed={o.SeedVc.DiffusionSteps}|{o.SeedVc.LengthAdjust:0.######}|{o.SeedVc.IntelligibilityCfgRate:0.######}|{o.SeedVc.SimilarityCfgRate:0.######}|{o.SeedVc.TopP:0.######}|{o.SeedVc.Temperature:0.######}|{o.SeedVc.RepetitionPenalty:0.######}");
