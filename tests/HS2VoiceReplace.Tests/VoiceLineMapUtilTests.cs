@@ -112,5 +112,38 @@ public sealed class VoiceLineMapUtilTests
             tempRoot.Delete(true);
         }
     }
+
+    [Fact]
+    public void ChoosePreferredVoiceLineMap_PrefersNonEmptyCachedMap()
+    {
+        var cached = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["adv/a.wav"] = "cached line",
+        };
+        var rebuilt = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["adv/b.wav"] = "rebuilt line",
+        };
+
+        var actual = VoiceLineMapUtil.ChoosePreferredVoiceLineMap(cached, rebuilt);
+
+        Assert.Single(actual);
+        Assert.Equal("cached line", actual["adv/a.wav"]);
+    }
+
+    [Fact]
+    public void ChoosePreferredVoiceLineMap_UsesRebuiltMapWhenCacheIsEmpty()
+    {
+        var cached = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var rebuilt = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["adv/b.wav"] = "rebuilt line",
+        };
+
+        var actual = VoiceLineMapUtil.ChoosePreferredVoiceLineMap(cached, rebuilt);
+
+        Assert.Single(actual);
+        Assert.Equal("rebuilt line", actual["adv/b.wav"]);
+    }
 }
 

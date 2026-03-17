@@ -84,6 +84,7 @@ public sealed partial class MainForm : Form
     private string _lastPreviewNormalPath = string.Empty;
     private string _lastPreviewEroPath = string.Empty;
     private string _lastGridRunRoot = string.Empty;
+    private Dictionary<string, int> _partialGridColumnWidths = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<SampleAssetItem> _sampleAssets = new();
     private readonly IVoiceReplaceApplicationService _appService = new VoiceReplaceApplicationService();
     private string _normalSampleAssetId = string.Empty;
@@ -91,9 +92,6 @@ public sealed partial class MainForm : Form
     private const string SampleHashAlgorithmVersion = SampleAssetConstants.HashAlgorithmVersion;
     private const string RuntimePluginFileName = "HS2_VoiceReplace.dll";
     private const string LegacyRuntimePluginFileName = "HS2VoiceReplace.Runtime.dll";
-    private static readonly Regex AutoResumeRunRootRegex = new(
-        @"[\\/]+gui_runs[\\/]+resume_c\d{2}$",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     private static readonly PersonalityChoiceItem[] PersonalityChoices =
     {
         new() { Id = 0, NameKey = "personality.00" },

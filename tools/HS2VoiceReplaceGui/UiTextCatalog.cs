@@ -54,9 +54,9 @@ internal static class UiTextCatalog
 
         // General settings
         ["general.title"] = E("基本設定", "General Settings"),
-        ["general.bundledRuntimeRoot"] = E("同梱ランタイムルート（固定）", "Bundled runtime root (fixed)"),
-        ["general.outputRoot"] = E("出力ルート（固定）", "Output root (fixed)"),
-        ["general.externalToolsRoot"] = E("外部ツールルート（任意）", "External tools root (optional)"),
+        ["general.bundledRuntimeRoot"] = E("同梱ランタイムルート", "Bundled runtime root"),
+        ["general.outputRoot"] = E("出力ルート", "Output root"),
+        ["general.externalToolsRoot"] = E("依存ツール保存先", "External tools root"),
         ["general.hs2Root"] = E("HS2フォルダ", "HS2 folder"),
         ["general.uiLanguage"] = E("UI言語", "UI language"),
         ["general.executionOptions"] = E("実行オプション", "Execution options"),
@@ -73,7 +73,6 @@ internal static class UiTextCatalog
         ["core.conversionSummary"] = E("変換設定:", "Conversion settings:"),
         ["core.sampleSignature"] = E("サンプル署名:", "Sample signatures:"),
         ["core.sampleSignatureUnavailable"] = E("N:（取得失敗） E:（取得失敗）", "N:(error) E:(error)"),
-        ["core.optionalSuffix"] = E("（任意）", "(Optional)"),
 
         // Sample audio dialog
         ["dialog.sampleAudio.title"] = E("サンプル音声", "Sample Audio"),

@@ -95,7 +95,7 @@ internal sealed partial class PartialRebuildGridDialog
         {
             Dock = DockStyle.Fill,
             AutoSize = true,
-            Margin = new Padding(0, 6, 0, 2),
+            Margin = new Padding(0, 6, 0, 6),
             Padding = new Padding(0),
             WrapContents = false,
             FlowDirection = FlowDirection.RightToLeft,
@@ -248,6 +248,39 @@ internal sealed partial class PartialRebuildGridDialog
         });
 
         _grid.DataSource = _rows;
+    }
+
+    public Dictionary<string, int> GetColumnWidths()
+    {
+        var map = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (DataGridViewColumn column in _grid.Columns)
+        {
+            var key = !string.IsNullOrWhiteSpace(column.DataPropertyName)
+                ? column.DataPropertyName
+                : column.Name;
+            if (string.IsNullOrWhiteSpace(key) || column.Width <= 0)
+                continue;
+            map[key] = column.Width;
+        }
+        return map;
+    }
+
+    public void ApplyColumnWidths(IReadOnlyDictionary<string, int>? widths)
+    {
+        if (widths == null || widths.Count == 0)
+            return;
+
+        foreach (DataGridViewColumn column in _grid.Columns)
+        {
+            var key = !string.IsNullOrWhiteSpace(column.DataPropertyName)
+                ? column.DataPropertyName
+                : column.Name;
+            if (string.IsNullOrWhiteSpace(key))
+                continue;
+            if (!widths.TryGetValue(key, out var width) || width <= 0)
+                continue;
+            column.Width = width;
+        }
     }
 
     private void SetBusyControls()

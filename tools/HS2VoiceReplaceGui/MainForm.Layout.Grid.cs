@@ -6,6 +6,7 @@ public sealed partial class MainForm
     {
         try
         {
+            CaptureEmbeddedGridColumnWidths();
             _gridHost.Controls.Clear();
             _embeddedGrid?.Dispose();
 
@@ -36,12 +37,22 @@ public sealed partial class MainForm
             };
             _gridHost.Controls.Add(_embeddedGrid);
             _embeddedGrid.Show();
+            if (_partialGridColumnWidths.Count > 0)
+                _embeddedGrid.ApplyColumnWidths(_partialGridColumnWidths);
             _embeddedGrid.SetRunRoot(suggested, reload: true);
         }
         catch (Exception ex)
         {
             AppendLog(T("log.embeddedGridInitFailed", ex.Message));
         }
+    }
+
+    private void CaptureEmbeddedGridColumnWidths()
+    {
+        if (_embeddedGrid is null || _embeddedGrid.IsDisposed)
+            return;
+
+        _partialGridColumnWidths = _embeddedGrid.GetColumnWidths();
     }
 
     private void ReflowLayout()
@@ -86,7 +97,10 @@ public sealed partial class MainForm
 
     private void SyncGridRunRootWithSelectedPersonality(bool updateEmbeddedGrid)
     {
-        var suggested = Path.Combine(_activeOutputRoot, "gui_runs", $"resume_c{GetSelectedPersonalityId():00}");
+        var suggested = RunRootSelectionUtil.ResolveSuggestedRunRoot(
+            _lastGridRunRoot,
+            _activeOutputRoot,
+            GetSelectedPersonalityId());
         _lastGridRunRoot = suggested;
         if (updateEmbeddedGrid)
             _embeddedGrid?.SetRunRoot(_lastGridRunRoot, reload: true);
@@ -106,7 +120,10 @@ public sealed partial class MainForm
             _cmbPersonality.Items.Add(p);
         var defaultIndex = Array.FindIndex(PersonalityChoices, p => p.Id == 0);
         _cmbPersonality.SelectedIndex = defaultIndex >= 0 ? defaultIndex : 0;
-        _lastGridRunRoot = Path.Combine(_activeOutputRoot, "gui_runs", $"resume_c{GetSelectedPersonalityId():00}");
+        _lastGridRunRoot = RunRootSelectionUtil.ResolveSuggestedRunRoot(
+            currentRunRoot: null,
+            _activeOutputRoot,
+            GetSelectedPersonalityId());
         RefreshSampleSignatureDisplay();
     }
 

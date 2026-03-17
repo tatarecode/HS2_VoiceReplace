@@ -32,6 +32,7 @@ internal sealed class PersistedUiSettings
     public string? UiLanguageCode { get; set; }
     public string? NormalSampleAssetId { get; set; }
     public string? EroSampleAssetId { get; set; }
+    public Dictionary<string, int>? PartialGridColumnWidths { get; set; }
 }
 
 internal sealed class PersonalityChoiceItem

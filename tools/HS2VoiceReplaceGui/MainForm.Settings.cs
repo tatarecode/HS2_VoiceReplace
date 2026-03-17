@@ -31,6 +31,10 @@ public sealed partial class MainForm
             if (!string.IsNullOrWhiteSpace(s.NormalSampleAssetId)) _normalSampleAssetId = s.NormalSampleAssetId!;
             if (!string.IsNullOrWhiteSpace(s.EroSampleAssetId)) _eroSampleAssetId = s.EroSampleAssetId!;
             if (!string.IsNullOrWhiteSpace(s.LastGridRunRoot)) _lastGridRunRoot = s.LastGridRunRoot!;
+            _partialGridColumnWidths = s.PartialGridColumnWidths?
+                .Where(x => !string.IsNullOrWhiteSpace(x.Key) && x.Value > 0)
+                .ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase)
+                ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
             if (s.SkipCompleted.HasValue) _chkSkipCompleted.Checked = s.SkipCompleted.Value;
 
@@ -75,6 +79,7 @@ public sealed partial class MainForm
             SaveBootstrapSettings();
             if (_embeddedGrid is { IsDisposed: false } && !string.IsNullOrWhiteSpace(_embeddedGrid.RunRoot))
                 _lastGridRunRoot = _embeddedGrid.RunRoot;
+            CaptureEmbeddedGridColumnWidths();
             var s = new PersistedUiSettings
             {
                 Hs2Root = GetConfiguredHs2Root(),
@@ -92,6 +97,9 @@ public sealed partial class MainForm
                 UiLanguageCode = GetUiLanguageCode(_uiLanguage),
                 NormalSampleAssetId = _normalSampleAssetId,
                 EroSampleAssetId = _eroSampleAssetId,
+                PartialGridColumnWidths = _partialGridColumnWidths.Count > 0
+                    ? new Dictionary<string, int>(_partialGridColumnWidths, StringComparer.OrdinalIgnoreCase)
+                    : null,
             };
             var json = System.Text.Json.JsonSerializer.Serialize(s, new System.Text.Json.JsonSerializerOptions
             {

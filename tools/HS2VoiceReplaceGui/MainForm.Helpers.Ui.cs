@@ -114,7 +114,7 @@ public sealed partial class MainForm
 
     private void AddPathRow(TableLayoutPanel panel, ref int row, string label, TextBox text, bool required, PathMode mode)
     {
-        AddFieldLabel(panel, ref row, required ? label : label + T("core.optionalSuffix"));
+        AddFieldLabel(panel, ref row, label);
         panel.Controls.Add(text, 0, row);
 
         var buttonPanel = new FlowLayoutPanel

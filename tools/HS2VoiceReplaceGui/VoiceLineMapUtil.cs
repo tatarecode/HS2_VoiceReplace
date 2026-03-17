@@ -104,6 +104,16 @@ internal static class VoiceLineMapUtil
         return map;
     }
 
+    public static Dictionary<string, string> ChoosePreferredVoiceLineMap(
+        IReadOnlyDictionary<string, string> cached,
+        IReadOnlyDictionary<string, string> rebuilt)
+    {
+        if (cached.Count > 0)
+            return new Dictionary<string, string>(cached, StringComparer.OrdinalIgnoreCase);
+
+        return new Dictionary<string, string>(rebuilt, StringComparer.OrdinalIgnoreCase);
+    }
+
     public static void SaveVoiceLineMapCsv(string path, IReadOnlyDictionary<string, string> map)
     {
         File.WriteAllLines(path, SerializeVoiceLineMapCsv(map), new UTF8Encoding(false));

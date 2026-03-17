@@ -181,17 +181,19 @@ internal sealed partial class PartialRebuildGridDialog
     private Dictionary<string, string> LoadVoiceLineMap(string runRoot)
     {
         var cached = LoadVoiceLineMapFromCsv(runRoot);
-        var shouldRebuild = cached.Count == 0 || cached.Count < 40000;
+        var shouldRebuild = cached.Count == 0;
         if (!shouldRebuild)
             return cached;
 
-        // Rebuild from extracted TextAssets when the cached CSV is missing or obviously incomplete.
+        // Rebuild only when the cache is missing. A cached map may include ADV supplementation
+        // that is not recoverable from list_h_sound_voice_* TextAssets alone.
         var built = BuildVoiceLineMapFromTextAssets(runRoot);
-        if (built.Count > 0)
+        var preferred = VoiceLineMapUtil.ChoosePreferredVoiceLineMap(cached, built);
+        if (preferred.Count > 0)
         {
-            if (built.Count != cached.Count)
-                SaveVoiceLineMapCsv(runRoot, built);
-            return built;
+            if (cached.Count == 0)
+                SaveVoiceLineMapCsv(runRoot, preferred);
+            return preferred;
         }
 
         return cached;
